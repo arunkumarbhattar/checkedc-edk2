@@ -15,6 +15,33 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <PiDxe.h>
+#include <Guid/DxeServices.h>
+#include <Protocol/VariableWrite.h>
+#include <Protocol/FaultTolerantWrite.h>
+#include <Protocol/FirmwareVolumeBlock.h>
+#include <Protocol/Variable.h>
+#include <Protocol/VariableLock.h>
+#include <Protocol/VarCheck.h>
+#include <Library/HobLib.h>
+#include <Library/UefiDriverEntryPoint.h>
+#include <Library/UefiRuntimeLib.h>
+#include <Library/DebugLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/BaseLib.h>
+#include <Library/DxeServicesTableLib.h>
+#include <Library/SynchronizationLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/AuthVariableLib.h>
+#include <Library/VarCheckLib.h>
+#include <Library/VariableFlashInfoLib.h>
+#include <Library/SafeIntLib.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/EventGroup.h>
+#include <Guid/VariableFormat.h>
+#include <Guid/SystemNvDataGuid.h>
+#include <Guid/FaultTolerantWrite.h>
+#include <Guid/VarErrorFlag.h>
 #define CHAR_DASH 0x002D
 #define CHAR_F 0x0046
 #define CHAR_f 0x0066
@@ -289,34 +316,55 @@ UefiMain (
   )
 {
   UINTN EventIndex;
-  BOOLEAN FLAG_F;
-  BOOLEAN FLAG_N;
-  BOOLEAN FLAG_S;
-  EFI_INPUT_KEY Key;
-  UINTN MaxLen = 12;
   EFI_STATUS Status;
-  UINT64 OsIndicationsSupported;
-  UINT64 OsIndication;
-  UINTN DataSize;
-
-  DataSize = sizeof (UINT64);
+  EFI_INPUT_KEY Key;
+  EFI_PEI_HOB_POINTERS FvHob;
+  EFI_HANDLE FvProtocolHandle;
+  EFI_FIRMWARE_VOLUME_HEADER *FwHeader;
 
   //NVRAM Variables are stored in MdePkg/Include/Guid/GlobalVariable.h
 
-  //
-  // Three PCD type (FeatureFlag, UINT32 and String) are used as the sample.
-  //
+  // Enable PCD in order to run the code
   if (FeaturePcdGet (PcdBreakingBootPrintEnable)) {
     Print ((CHAR16 *)PcdGetPtr (PcdBreakingBootPrintString));
 
     HelpMenu(0);
-    FLAG_S = FALSE;
-    FLAG_N = FALSE;
-    FLAG_F = FALSE;
+
     do {
       gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &EventIndex);
       gST->ConIn->ReadKeyStroke(gST->ConIn, &Key);
-      Print(L"%c",Key.UnicodeChar);
+      Print(L"%c\n",Key.UnicodeChar);
+      switch (Key.UnicodeChar)
+      {
+        case CHAR_F:
+        case CHAR_f:
+          FvHob.Raw = GetHobList();
+          FvHob.Raw = GetNextHob(EFI_HOB_TYPE_FV, FvHob.Raw);
+          FwHeader = (EFI_FIRMWARE_VOLUME_HEADER *) (UINTN) ((EFI_PHYSICAL_ADDRESS)(UINTN)FvHob.FirmwareVolume->BaseAddress);
+          Status = gDS->ProcessFirmwareVolume((VOID *) FwHeader, (MAX_UINT32), &FvProtocolHandle);
+          Print(L"ProcessFirmwareVolume Status - %r\n", Status);
+          DEBUG((DEBUG_INFO, "ProcessFirmwareVolume - %r\n", Status));
+
+          break;
+
+        case CHAR_S:
+        case CHAR_s:
+          Print(L"Entered Support\n");
+          HelpMenu(0);
+          break;
+
+        case CHAR_N:
+        case CHAR_n:
+          Print(L"Entered Normal\n");
+          FvHob.Raw = GetHobList();
+          FvHob.Raw = GetNextHob(EFI_HOB_TYPE_FV, FvHob.Raw);
+          FwHeader = (EFI_FIRMWARE_VOLUME_HEADER *) (UINTN) ((EFI_PHYSICAL_ADDRESS)(UINTN)FvHob.FirmwareVolume->BaseAddress);
+          Status = gDS->ProcessFirmwareVolume((VOID *) FwHeader, (FwHeader->FvLength), &FvProtocolHandle);
+          DEBUG((DEBUG_INFO, "ProcessFirmwareVolume - %r\n", Status));
+          Print(L"ProcessFirmwareVolume Status - %r\n", Status);
+          break;
+      }
+      /*
       if(Key.UnicodeChar == CHAR_CARRIAGE_RETURN)
       {
         Print(L"\n");
@@ -469,6 +517,7 @@ UefiMain (
         FLAG_F = FALSE;
         FLAG_S = FALSE;
       }
+      */
     } while(!(Key.ScanCode == SCAN_ESC));
 
   }

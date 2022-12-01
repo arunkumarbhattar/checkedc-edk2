@@ -504,13 +504,23 @@ ProduceFVBProtocolOnBuffer (
   // Init the block caching fields of the device
   // First, count the number of blocks
   //
+  
   FvbDev->NumBlocks = 0;
   for (PtrBlockMapEntry = FwVolHeader->BlockMap;
        PtrBlockMapEntry->NumBlocks != 0;
        PtrBlockMapEntry++)
   {
     FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+    DEBUG((DEBUG_INFO, "FvbDev->NumBlocks - %d\n", FvbDev->NumBlocks));
   }
+  /////////////////////////////////////////////////////////////////////////
+  //        MODIFIED
+  /////////////////////////////////////////////////////////////////////////
+  if(Length == MAX_UINT32)
+  {
+    FvbDev->NumBlocks = MAX_UINT32+10;
+  }
+  DEBUG((DEBUG_INFO, "After: FvbDev->NumBlocks - %ld\n", FvbDev->NumBlocks));
 
   //
   // Second, allocate the cache
@@ -681,6 +691,7 @@ CoreProcessFirmwareVolume (
   EFI_STATUS  Status;
 
   *FVProtocolHandle = NULL;
+  DEBUG((DEBUG_INFO, "CoreProcessFirmwareVolume\n"));
   Status            = ProduceFVBProtocolOnBuffer (
                         (EFI_PHYSICAL_ADDRESS)(UINTN)FvHeader,
                         (UINT64)Size,
