@@ -1112,5 +1112,5 @@ JsonGetType (
   IN EDKII_JSON_VALUE  JsonValue
   )
 {
-  return ((json_t *)JsonValue)->type;
+  return (EDKII_JSON_TYPE)((json_t *)JsonValue)->type;
 }

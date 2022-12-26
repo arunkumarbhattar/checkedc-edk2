@@ -662,6 +662,9 @@ class BuildTask:
     def Start(self):
         EdkLogger.quiet("Building ... %s" % repr(self.BuildItem))
         Command = self.BuildItem.BuildCommand + [self.BuildItem.Target]
+        Command = "bear -- " + str(" ".join(Command))
+        # print the BuildCommand
+        EdkLogger.quiet("**>>THE BUILD COMMAND IS "+ Command)
         self.BuildTread = Thread(target=self._CommandThread, args=(Command, self.BuildItem.WorkingDir))
         self.BuildTread.name = "build thread"
         self.BuildTread.daemon = False
@@ -1293,6 +1296,8 @@ class Build():
             EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
+        # print the BuildCommand
+        EdkLogger.quiet("**THE BUILD COMMAND IS ".join(BuildCommand))
         if BuildCommand is None or len(BuildCommand) == 0:
             EdkLogger.error("build", OPTION_MISSING,
                             "No build command found for this module. "
@@ -1436,6 +1441,8 @@ class Build():
             EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
+        # print the BuildCommand
+        EdkLogger.quiet("**THE BUILD COMMAND IS ".join(BuildCommand))
         if BuildCommand is None or len(BuildCommand) == 0:
             EdkLogger.error("build", OPTION_MISSING,
                             "No build command found for this module. "

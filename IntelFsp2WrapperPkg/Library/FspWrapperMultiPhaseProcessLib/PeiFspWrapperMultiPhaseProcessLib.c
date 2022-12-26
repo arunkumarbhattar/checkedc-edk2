@@ -74,7 +74,7 @@ CallFspMultiPhaseEntry (
   // FSP_MULTI_PHASE_INIT and FSP_MULTI_PHASE_SI_INIT API functions having same prototype.
   //
   UINTN                   FspMultiPhaseApiEntry;
-  UINTN                   FspMultiPhaseApiOffset;
+  UINTN                   FspMultiPhaseApiOffset = 0;
   EFI_STATUS              Status;
   BOOLEAN                 InterruptState;
   BOOLEAN                 IsVariableServiceRequest;
