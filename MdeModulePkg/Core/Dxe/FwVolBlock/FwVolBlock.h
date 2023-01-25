@@ -36,7 +36,7 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL              *DevicePath;
   EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL    FwVolBlockInstance;
   UINTN                                 NumBlocks;
-  LBA_CACHE                             *LbaCache;
+  LBA_CACHE*                 		LbaCache : itype(_Array_ptr<LBA_CACHE>) count(NumBlocks);
   UINT32                                FvbAttributes;
   EFI_PHYSICAL_ADDRESS                  BaseAddress;
   UINT32                                AuthenticationStatus;

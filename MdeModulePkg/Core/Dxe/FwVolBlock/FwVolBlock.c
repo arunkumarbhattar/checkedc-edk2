@@ -504,12 +504,18 @@ ProduceFVBProtocolOnBuffer (
   // Init the block caching fields of the device
   // First, count the number of blocks
   //
-  FvbDev->NumBlocks = 0;
+  _Unchecked {
+	  FvbDev->NumBlocks = 0;
+  }
+  
   for (PtrBlockMapEntry = FwVolHeader->BlockMap;
        PtrBlockMapEntry->NumBlocks != 0;
        PtrBlockMapEntry++)
   {
-    FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+  	_Unchecked
+	{
+		FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+	}
   }
 
   //
@@ -520,7 +526,8 @@ ProduceFVBProtocolOnBuffer (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  FvbDev->LbaCache = AllocatePool (FvbDev->NumBlocks * sizeof (LBA_CACHE));
+  FvbDev->LbaCache = _Assume_bounds_cast<_Array_ptr<LBA_CACHE>>(AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE)), 
+		  count(FvbDev->NumBlocks));
   if (FvbDev->LbaCache == NULL) {
     CoreFreePool (FvbDev);
     return EFI_OUT_OF_RESOURCES;
