@@ -14,6 +14,8 @@
 #
 from __future__ import print_function
 from __future__ import absolute_import
+
+import json
 import os.path as path
 import sys
 import os
@@ -662,9 +664,6 @@ class BuildTask:
     def Start(self):
         EdkLogger.quiet("Building ... %s" % repr(self.BuildItem))
         Command = self.BuildItem.BuildCommand + [self.BuildItem.Target]
-        Command = "bear -- " + str(" ".join(Command))
-        # print the BuildCommand
-        EdkLogger.quiet("**>>THE BUILD COMMAND IS "+ Command)
         self.BuildTread = Thread(target=self._CommandThread, args=(Command, self.BuildItem.WorkingDir))
         self.BuildTread.name = "build thread"
         self.BuildTread.daemon = False
@@ -1296,8 +1295,6 @@ class Build():
             EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
-        # print the BuildCommand
-        EdkLogger.quiet("**THE BUILD COMMAND IS ".join(BuildCommand))
         if BuildCommand is None or len(BuildCommand) == 0:
             EdkLogger.error("build", OPTION_MISSING,
                             "No build command found for this module. "
@@ -1441,8 +1438,6 @@ class Build():
             EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
-        # print the BuildCommand
-        EdkLogger.quiet("**THE BUILD COMMAND IS ".join(BuildCommand))
         if BuildCommand is None or len(BuildCommand) == 0:
             EdkLogger.error("build", OPTION_MISSING,
                             "No build command found for this module. "
@@ -2585,6 +2580,33 @@ def ThreadNum():
 #   @retval 1     Tool failed
 #
 LogQMaxSize = ThreadNum() * 10
+
+
+def get_compile_commands(build_dir):
+    compile_commands = []
+
+    # Iterate through all the files in the build directory
+    for root, _, files in os.walk(build_dir):
+        for file in files:
+            # Check if the file is a C or C++ source file
+            if file.endswith(('.c', '.cpp', '.cxx', '.cc')):
+                # Get the path to the file relative to the build directory
+                file_path = os.path.join(root, file)
+                file_path = file_path[len(build_dir) + 1:]
+
+                # Get the command used to compile the file
+                command = 'gcc -c -o ' + file_path + '.o ' + file_path
+
+                # Add the compile command to the list
+                compile_commands.append({
+                    'directory': root,
+                    'command': command,
+                    'file': file_path
+                })
+
+    return compile_commands
+
+
 def Main():
     StartTime = time.time()
 
@@ -2660,6 +2682,13 @@ def Main():
         GlobalData.gAllFiles = Utils.DirCache(Workspace)
 
         WorkingDirectory = os.getcwd()
+        # Get the compile commands
+        compile_commands = get_compile_commands(WorkingDirectory)
+
+        # Save the compile commands to a JSON file
+        with open('compile_commands.json', 'w') as f:
+            json.dump(compile_commands, f, indent=2)
+
         if not Option.ModuleFile:
             FileList = glob.glob(os.path.normpath(os.path.join(WorkingDirectory, '*.inf')))
             FileNum = len(FileList)
