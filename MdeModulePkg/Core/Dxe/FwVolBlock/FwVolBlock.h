@@ -11,6 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define _FWVOL_BLOCK_H_
 
 #define FVB_DEVICE_SIGNATURE  SIGNATURE_32('_','F','V','B')
+#define checkedc
 
 typedef struct {
   UINTN    Base;
@@ -36,7 +37,11 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL              *DevicePath;
   EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL    FwVolBlockInstance;
   UINTN                                 NumBlocks;
-  LBA_CACHE*                 		LbaCache : itype(_Array_ptr<LBA_CACHE>) count(NumBlocks);
+#ifdef checkedc 
+  _Array_ptr<LBA_CACHE>  		LbaCache : count(NumBlocks);
+#else
+  LBA_CACHE*                            LbaCache;
+#endif
   UINT32                                FvbAttributes;
   EFI_PHYSICAL_ADDRESS                  BaseAddress;
   UINT32                                AuthenticationStatus;

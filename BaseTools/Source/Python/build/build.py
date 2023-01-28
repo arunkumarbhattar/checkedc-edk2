@@ -662,12 +662,16 @@ class BuildTask:
     ## Start build task thread
     #
     def Start(self):
-        EdkLogger.quiet("Building ... %s" % repr(self.BuildItem))
-        Command = self.BuildItem.BuildCommand + [self.BuildItem.Target]
+        EdkLogger.quiet("Building ...Start() %s" % repr(self.BuildItem))
+        Command = "bear -- "+ self.BuildItem.BuildCommand + [self.BuildItem.Target]
+        EdkLogger.quiet("Building ...Start() %s" % str(Command))
+        # print the current working directory
+        EdkLogger.quiet("Building ...Start() %s" % repr(self.BuildItem.WorkingDir))
         self.BuildTread = Thread(target=self._CommandThread, args=(Command, self.BuildItem.WorkingDir))
         self.BuildTread.name = "build thread"
         self.BuildTread.daemon = False
         self.BuildTread.start()
+        EdkLogger.quiet("Building ...FINISHED() ")
 
 ## The class contains the information related to EFI image
 #
@@ -1292,7 +1296,7 @@ class Build():
             AutoGenObject.CreateMakeFile(True)
 
         if EdkLogger.GetLevel() == EdkLogger.QUIET:
-            EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
+            EdkLogger.quiet("Building ...PA %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
         if BuildCommand is None or len(BuildCommand) == 0:
@@ -1435,7 +1439,7 @@ class Build():
             AutoGenObject.CreateMakeFile(True)
 
         if EdkLogger.GetLevel() == EdkLogger.QUIET:
-            EdkLogger.quiet("Building ... %s" % repr(AutoGenObject))
+            EdkLogger.quiet("Building ...() %s" % repr(AutoGenObject))
 
         BuildCommand = AutoGenObject.BuildCommand
         if BuildCommand is None or len(BuildCommand) == 0:
@@ -2682,12 +2686,14 @@ def Main():
         GlobalData.gAllFiles = Utils.DirCache(Workspace)
 
         WorkingDirectory = os.getcwd()
+        #print the build directory
+        EdkLogger.quiet("Build directory: %s" % WorkingDirectory)
         # Get the compile commands
-        compile_commands = get_compile_commands(WorkingDirectory)
+        #compile_commands = get_compile_commands(WorkingDirectory)
 
         # Save the compile commands to a JSON file
-        with open('compile_commands.json', 'w') as f:
-            json.dump(compile_commands, f, indent=2)
+        #with open('compile_commands.json', 'w') as f:
+        #    json.dump(compile_commands, f, indent=2)
 
         if not Option.ModuleFile:
             FileList = glob.glob(os.path.normpath(os.path.join(WorkingDirectory, '*.inf')))

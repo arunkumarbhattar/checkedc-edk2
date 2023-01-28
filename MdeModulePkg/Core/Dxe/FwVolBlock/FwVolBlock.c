@@ -504,18 +504,27 @@ ProduceFVBProtocolOnBuffer (
   // Init the block caching fields of the device
   // First, count the number of blocks
   //
-  _Unchecked {
-	  FvbDev->NumBlocks = 0;
+#ifdef checkedc
+  _Bundled {
+	FvbDev->NumBlocks = 0;
+	FvbDev->LbaCache = NULL;
   }
+#else
+  FvbDev->NumBlocks = 0;
+#endif
   
   for (PtrBlockMapEntry = FwVolHeader->BlockMap;
        PtrBlockMapEntry->NumBlocks != 0;
        PtrBlockMapEntry++)
   {
-  	_Unchecked
-	{
-		FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+#ifdef checkedc
+	_Bundled {
+	  FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+	  FvbDev->LbaCache = NULL;
 	}
+#else
+	FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
+#endif
   }
 
   //
@@ -525,9 +534,13 @@ ProduceFVBProtocolOnBuffer (
     CoreFreePool (FvbDev);
     return EFI_OUT_OF_RESOURCES;
   }
+ 
+#ifdef checkedc
+  FvbDev->LbaCache = _Assume_bounds_cast<_Array_ptr<LBA_CACHE>>(AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE)),  count(FvbDev->NumBlocks));
+#else
+    FvbDev->LbaCache = AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE));
+#endif
 
-  FvbDev->LbaCache = _Assume_bounds_cast<_Array_ptr<LBA_CACHE>>(AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE)), 
-		  count(FvbDev->NumBlocks));
   if (FvbDev->LbaCache == NULL) {
     CoreFreePool (FvbDev);
     return EFI_OUT_OF_RESOURCES;
