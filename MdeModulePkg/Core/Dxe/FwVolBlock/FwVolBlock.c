@@ -538,7 +538,7 @@ ProduceFVBProtocolOnBuffer (
 #ifdef checkedc
   FvbDev->LbaCache = _Assume_bounds_cast<_Array_ptr<LBA_CACHE>>(AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE)),  count(FvbDev->NumBlocks));
 #else
-    FvbDev->LbaCache = AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE));
+  FvbDev->LbaCache = AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE));
 #endif
 
   if (FvbDev->LbaCache == NULL) {
