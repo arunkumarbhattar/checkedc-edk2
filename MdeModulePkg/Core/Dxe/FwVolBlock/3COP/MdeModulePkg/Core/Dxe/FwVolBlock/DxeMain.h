@@ -113,7 +113,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define DEPEX_STACK_SIZE_INCREMENT  0x1000
 
 typedef struct {
-  EFI_GUID     *ProtocolGuid;
+  _Ptr<EFI_GUID> ProtocolGuid;
   VOID         **Protocol;
   EFI_EVENT    Event;
   VOID         *Registration;
@@ -141,8 +141,8 @@ typedef struct {
 
   EFI_HANDLE                       FvHandle;
   EFI_GUID                         FileName;
-  EFI_DEVICE_PATH_PROTOCOL         *FvFileDevicePath;
-  EFI_FIRMWARE_VOLUME2_PROTOCOL    *Fv;
+  _Ptr<EFI_DEVICE_PATH_PROTOCOL> FvFileDevicePath;
+  _Ptr<EFI_FIRMWARE_VOLUME2_PROTOCOL> Fv;
 
   VOID                             *Depex;
   UINTN                            DepexSize;
@@ -190,7 +190,7 @@ typedef struct {
   /// If entrypoint has been called
   BOOLEAN                                 Started;
   /// The image's entry point
-  EFI_IMAGE_ENTRY_POINT                   EntryPoint;
+  EFI_IMAGE_ENTRY_POINT EntryPoint;
   /// loaded image protocol
   EFI_LOADED_IMAGE_PROTOCOL               Info;
   /// Location in memory
@@ -198,7 +198,7 @@ typedef struct {
   /// Number of pages
   UINTN                                   NumberOfPages;
   /// Original fixup data
-  CHAR8                                   *FixupData;
+  _Ptr<CHAR8> FixupData;
   /// Tpl of started image
   EFI_TPL                                 Tpl;
   /// Status returned by started image
@@ -210,15 +210,15 @@ typedef struct {
   /// Pointer to pool allocation for context save/restore
   VOID                                    *JumpBuffer;
   /// Pointer to buffer for context save/restore
-  BASE_LIBRARY_JUMP_BUFFER                *JumpContext;
+  _Ptr<BASE_LIBRARY_JUMP_BUFFER> JumpContext;
   /// Machine type from PE image
   UINT16                                  Machine;
   /// PE/COFF Image Emulator Protocol pointer
-  EDKII_PECOFF_IMAGE_EMULATOR_PROTOCOL    *PeCoffEmu;
+  _Ptr<EDKII_PECOFF_IMAGE_EMULATOR_PROTOCOL> PeCoffEmu;
   /// Runtime image list
-  EFI_RUNTIME_IMAGE_ENTRY                 *RuntimeData;
+  _Ptr<EFI_RUNTIME_IMAGE_ENTRY> RuntimeData;
   /// Pointer to Loaded Image Device Path Protocol
-  EFI_DEVICE_PATH_PROTOCOL                *LoadedImageDevicePath;
+  _Ptr<EFI_DEVICE_PATH_PROTOCOL> LoadedImageDevicePath;
   /// PeCoffLoader ImageContext
   PE_COFF_LOADER_IMAGE_CONTEXT            ImageContext;
   /// Status returned by LoadImage() service.
@@ -789,11 +789,10 @@ CoreUninstallProtocolInterface (
   @return The requested protocol interface for the handle
 
 **/
-_Itype_for_any(T) EFI_STATUS
+EFI_STATUS
 EFIAPI
 CoreHandleProtocol (
-  IN EFI_HANDLE  UserHandle : itype(_Ptr<T>),
-  //IN _Ptr<T>     UserHandle,
+  IN EFI_HANDLE  UserHandle,
   IN EFI_GUID    *Protocol,
   OUT VOID       **Interface
   );
@@ -2423,10 +2422,7 @@ CoreRemoveDebugImageInfoEntry (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockDriverInit (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
-  );
+FwVolBlockDriverInit(EFI_HANDLE        ImageHandle, _Ptr<EFI_SYSTEM_TABLE> SystemTable);
 
 /**
 
@@ -2438,9 +2434,7 @@ FwVolBlockDriverInit (
 
 **/
 UINT32
-GetFvbAuthenticationStatus (
-  IN EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *FvbProtocol
-  );
+GetFvbAuthenticationStatus (EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL *FvbProtocol : itype(_Ptr<EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL>));
 
 /**
   This routine produces a firmware volume block protocol on a given
@@ -2461,13 +2455,13 @@ GetFvbAuthenticationStatus (
                                  buffer.
 
 **/
-_For_any(T) EFI_STATUS
+EFI_STATUS
 ProduceFVBProtocolOnBuffer (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT _Ptr<_Ptr<T>>        *FvProtocol  OPTIONAL
+  OUT EFI_HANDLE           *FvProtocol  OPTIONAL
   );
 
 /**

@@ -916,10 +916,10 @@ CoreGetProtocolInterface (
   @retval EFI_INVALID_PARAMETER  Interface is NULL.
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreHandleProtocol (
-  IN EFI_HANDLE  UserHandle,
+  IN EFI_HANDLE  UserHandle : itype(_Ptr<T>),
   IN EFI_GUID    *Protocol,
   OUT VOID       **Interface
   )

@@ -792,8 +792,7 @@ CoreUninstallProtocolInterface (
 _Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreHandleProtocol (
-  IN EFI_HANDLE  UserHandle : itype(_Ptr<T>),
-  //IN _Ptr<T>     UserHandle,
+  IN EFI_HANDLE  UserHandle : itype (_Ptr<T>),
   IN EFI_GUID    *Protocol,
   OUT VOID       **Interface
   );
@@ -2022,12 +2021,13 @@ InitializeSectionExtraction (
                                  firmware volume
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreProcessFirmwareVolume (
   IN VOID         *FvHeader,
   IN UINTN        Size,
-  OUT EFI_HANDLE  *FVProtocolHandle
+  //OUT EFI_HANDLE  *FVProtocolHandle : itype(_Ptr<_Ptr<T>>)
+  _Ptr<_Ptr<T>> FVProtocolHandle
   );
 
 //
@@ -2461,13 +2461,13 @@ GetFvbAuthenticationStatus (
                                  buffer.
 
 **/
-_For_any(T) EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 ProduceFVBProtocolOnBuffer (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT _Ptr<_Ptr<T>>        *FvProtocol  OPTIONAL
+  OUT EFI_HANDLE           *FvProtocol  : itype (_Ptr<_Ptr<T>>) OPTIONAL
   );
 
 /**

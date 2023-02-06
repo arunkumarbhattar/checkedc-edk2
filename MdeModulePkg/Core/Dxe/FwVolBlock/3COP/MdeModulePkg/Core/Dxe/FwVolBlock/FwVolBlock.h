@@ -60,10 +60,7 @@ typedef struct {
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockGetAttributes (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  OUT       EFI_FVB_ATTRIBUTES_2                *Attributes
-  );
+FwVolBlockGetAttributes(const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL *This : itype(_Array_ptr<const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL>), _Ptr<EFI_FVB_ATTRIBUTES_2> Attributes);
 
 /**
   Modifies the current settings of the firmware volume according to the input parameter.
@@ -80,10 +77,7 @@ FwVolBlockGetAttributes (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockSetAttributes (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN CONST  EFI_FVB_ATTRIBUTES_2                *Attributes
-  );
+FwVolBlockSetAttributes(_Ptr<const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL> This, _Ptr<const EFI_FVB_ATTRIBUTES_2> Attributes);
 
 /**
   The EraseBlock() function erases one or more blocks as denoted by the
@@ -110,10 +104,7 @@ FwVolBlockSetAttributes (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockEraseBlock (
-  IN EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  ...
-  );
+FwVolBlockEraseBlock(_Ptr<EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL> This, ...);
 
 /**
   Read the specified number of bytes from the block to the input buffer.
@@ -137,13 +128,7 @@ FwVolBlockEraseBlock (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockReadBlock (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN CONST  EFI_LBA                             Lba,
-  IN CONST  UINTN                               Offset,
-  IN OUT    UINTN                               *NumBytes,
-  IN OUT    UINT8                               *Buffer
-  );
+FwVolBlockReadBlock(const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL *This : itype(_Array_ptr<const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL>) count(Lba), CONST  EFI_LBA                             Lba, CONST  UINTN                               Offset, _Ptr<UINTN> NumBytes, UINT8 *Buffer : itype(_Ptr<UINT8>));
 
 /**
   Writes the specified number of bytes from the input buffer to the block.
@@ -171,13 +156,7 @@ FwVolBlockReadBlock (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockWriteBlock (
-  IN     EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN     EFI_LBA                             Lba,
-  IN     UINTN                               Offset,
-  IN OUT UINTN                               *NumBytes,
-  IN     UINT8                               *Buffer
-  );
+FwVolBlockWriteBlock(_Ptr<EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL> This, EFI_LBA                             Lba, UINTN                               Offset, _Ptr<UINTN> NumBytes, _Ptr<UINT8> Buffer);
 
 /**
   Get Fvb's base address.
@@ -191,10 +170,7 @@ FwVolBlockWriteBlock (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockGetPhysicalAddress (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  OUT       EFI_PHYSICAL_ADDRESS                *Address
-  );
+FwVolBlockGetPhysicalAddress(const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL *This : itype(_Array_ptr<const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL>), _Ptr<EFI_PHYSICAL_ADDRESS> Address);
 
 /**
   Retrieves the size in bytes of a specific block within a firmware volume.
@@ -215,11 +191,6 @@ FwVolBlockGetPhysicalAddress (
 **/
 EFI_STATUS
 EFIAPI
-FwVolBlockGetBlockSize (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN CONST  EFI_LBA                             Lba,
-  IN OUT    UINTN                               *BlockSize,
-  IN OUT    UINTN                               *NumberOfBlocks
-  );
+FwVolBlockGetBlockSize(const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL *This : itype(_Array_ptr<const EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL>) count(Lba), CONST  EFI_LBA                             Lba, _Ptr<UINTN> BlockSize, _Ptr<UINTN> NumberOfBlocks);
 
 #endif

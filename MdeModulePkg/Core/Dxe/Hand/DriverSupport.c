@@ -39,10 +39,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
                                 associated with the ControllerHandle or specified by the RemainingDevicePath.
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreConnectController (
-  IN  EFI_HANDLE                ControllerHandle,
+  IN  EFI_HANDLE                ControllerHandle : itype(_Ptr<T>),
   IN  EFI_HANDLE                *DriverImageHandle    OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath  OPTIONAL,
   IN  BOOLEAN                   Recursive
@@ -82,7 +82,7 @@ CoreConnectController (
     //
     // Check whether the user has permission to start UEFI device drivers.
     //
-    Status = CoreHandleProtocol (ControllerHandle, &gEfiDevicePathProtocolGuid, (VOID **)&HandleFilePath);
+    Status = CoreHandleProtocol <void> (ControllerHandle, &gEfiDevicePathProtocolGuid, (VOID **)&HandleFilePath);
     if (!EFI_ERROR (Status)) {
       ASSERT (HandleFilePath != NULL);
       FilePath     = HandleFilePath;
@@ -258,13 +258,14 @@ CoreConnectController (
   @return None.
 
 **/
-VOID
+_Itype_for_any(T) VOID
 AddSortedDriverBindingProtocol (
-  IN      EFI_HANDLE                   DriverBindingHandle,
+  IN      EFI_HANDLE                   DriverBindingHandle : itype(_Ptr<void>),
   IN OUT  UINTN                        *NumberOfSortedDriverBindingProtocols,
   IN OUT  EFI_DRIVER_BINDING_PROTOCOL  **SortedDriverBindingProtocols,
   IN      UINTN                        DriverBindingHandleCount,
-  IN OUT  EFI_HANDLE                   *DriverBindingHandleBuffer,
+  //IN OUT  EFI_HANDLE                   *DriverBindingHandleBuffer : itype(_Array_ptr<_Ptr<void>>) count(DriverBindingHandleCount),
+  IN OUT  _Array_ptr<_Ptr<void>>       DriverBindingHandleBuffer : count(DriverBindingHandleCount),
   IN      BOOLEAN                      IsImageHandle
   )
 {
@@ -297,7 +298,7 @@ AddSortedDriverBindingProtocol (
       //
       // Retrieve the Driver Binding Protocol associated with each Driver Binding Handle
       //
-      Status = CoreHandleProtocol (
+      Status = CoreHandleProtocol <void> (
                  DriverBindingHandleBuffer[Index],
                  &gEfiDriverBindingProtocolGuid,
                  (VOID **)&DriverBinding
@@ -328,7 +329,7 @@ AddSortedDriverBindingProtocol (
   //
   // Retrieve the Driver Binding Protocol from DriverBindingHandle
   //
-  Status = CoreHandleProtocol (
+  Status = CoreHandleProtocol <void> (
              DriverBindingHandle,
              &gEfiDriverBindingProtocolGuid,
              (VOID **)&DriverBinding
@@ -389,9 +390,9 @@ AddSortedDriverBindingProtocol (
                                                 ControllerHandle.
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 CoreConnectSingleController (
-  IN  EFI_HANDLE                ControllerHandle,
+  IN  EFI_HANDLE                ControllerHandle : itype(_Ptr<void>),
   IN  EFI_HANDLE                *ContextDriverImageHandles OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath       OPTIONAL
   )
@@ -402,7 +403,8 @@ CoreConnectSingleController (
   EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL      *PlatformDriverOverride;
   EFI_BUS_SPECIFIC_DRIVER_OVERRIDE_PROTOCOL  *BusSpecificDriverOverride;
   UINTN                                      DriverBindingHandleCount;
-  EFI_HANDLE                                 *DriverBindingHandleBuffer;
+  //EFI_HANDLE                                 *DriverBindingHandleBuffer;
+  _Array_ptr<_Ptr<void>> 		     DriverBindingHandleBuffer :count (DriverBindingHandleCount) = NULL;
   UINTN                                      NewDriverBindingHandleCount;
   EFI_HANDLE                                 *NewDriverBindingHandleBuffer;
   EFI_DRIVER_BINDING_PROTOCOL                *DriverBinding;
@@ -419,7 +421,10 @@ CoreConnectSingleController (
   //
   // Initialize local variables
   //
-  DriverBindingHandleCount             = 0;
+  _Bundled {
+	  DriverBindingHandleCount             = 0;
+  	  DriverBindingHandleBuffer = NULL;
+  }
   DriverBindingHandleBuffer            = NULL;
   NumberOfSortedDriverBindingProtocols = 0;
   SortedDriverBindingProtocols         = NULL;
@@ -434,7 +439,7 @@ CoreConnectSingleController (
              &gEfiDriverBindingProtocolGuid,
              NULL,
              &DriverBindingHandleCount,
-             &DriverBindingHandleBuffer
+             (EFI_HANDLE **)DriverBindingHandleBuffer[0]
              );
   if (EFI_ERROR (Status) || (DriverBindingHandleCount == 0)) {
     return EFI_NOT_FOUND;
@@ -445,7 +450,7 @@ CoreConnectSingleController (
   //
   SortedDriverBindingProtocols = AllocatePool (sizeof (VOID *) * DriverBindingHandleCount);
   if (SortedDriverBindingProtocols == NULL) {
-    CoreFreePool (DriverBindingHandleBuffer);
+    CoreFreePool ((void*)*DriverBindingHandleBuffer);
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -501,7 +506,7 @@ CoreConnectSingleController (
     HighestIndex   = DriverBindingHandleCount;
     HighestVersion = 0;
     for (Index = 0; Index < DriverBindingHandleCount; Index++) {
-      Status = CoreHandleProtocol (
+      Status = CoreHandleProtocol <void> (
                  DriverBindingHandleBuffer[Index],
                  &gEfiDriverFamilyOverrideProtocolGuid,
                  (VOID **)&DriverFamilyOverride
@@ -532,7 +537,7 @@ CoreConnectSingleController (
   //
   // Get the Bus Specific Driver Override Protocol instance on the Controller Handle
   //
-  Status = CoreHandleProtocol (
+  Status = CoreHandleProtocol <void> (
              ControllerHandle,
              &gEfiBusSpecificDriverOverrideProtocolGuid,
              (VOID **)&BusSpecificDriverOverride
@@ -575,7 +580,7 @@ CoreConnectSingleController (
   //
   // Free the Driver Binding Handle Buffer
   //
-  CoreFreePool (DriverBindingHandleBuffer);
+  CoreFreePool ((void*)*DriverBindingHandleBuffer);
 
   //
   // If the number of Driver Binding Protocols has increased since this function started, then return
@@ -727,11 +732,11 @@ CoreConnectSingleController (
                                                 error.
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreDisconnectController (
   IN  EFI_HANDLE  ControllerHandle,
-  IN  EFI_HANDLE  DriverImageHandle  OPTIONAL,
+  IN  EFI_HANDLE  DriverImageHandle  OPTIONAL : itype(_Ptr<void>),
   IN  EFI_HANDLE  ChildHandle        OPTIONAL
   )
 {
@@ -861,7 +866,7 @@ CoreDisconnectController (
     //
     // Get the Driver Binding Protocol of the driver that is managing this controller
     //
-    Status = CoreHandleProtocol (
+    Status = CoreHandleProtocol <void> (
                DriverImageHandle,
                &gEfiDriverBindingProtocolGuid,
                (VOID **)&DriverBinding
