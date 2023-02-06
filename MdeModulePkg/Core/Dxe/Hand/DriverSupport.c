@@ -450,7 +450,7 @@ CoreConnectSingleController (
   //
   SortedDriverBindingProtocols = AllocatePool (sizeof (VOID *) * DriverBindingHandleCount);
   if (SortedDriverBindingProtocols == NULL) {
-    CoreFreePool ((void*)*DriverBindingHandleBuffer);
+    CoreFreePool ((void*)DriverBindingHandleBuffer);
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -580,7 +580,7 @@ CoreConnectSingleController (
   //
   // Free the Driver Binding Handle Buffer
   //
-  CoreFreePool ((void*)*DriverBindingHandleBuffer);
+  CoreFreePool ((void*)DriverBindingHandleBuffer);
 
   //
   // If the number of Driver Binding Protocols has increased since this function started, then return
