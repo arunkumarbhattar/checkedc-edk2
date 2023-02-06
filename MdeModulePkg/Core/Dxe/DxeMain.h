@@ -2467,7 +2467,7 @@ ProduceFVBProtocolOnBuffer (
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT _Ptr<_Ptr<T>>        *FvProtocol  OPTIONAL
+  OUT _Ptr<_Ptr<T>>        FvProtocol  OPTIONAL
   );
 
 /**
