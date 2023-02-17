@@ -511,7 +511,7 @@ typedef union {
   EFI_HOB_CPU                            *Cpu;
   EFI_HOB_MEMORY_POOL                    *Pool;
   EFI_HOB_UEFI_CAPSULE                   *Capsule;
-  UINT8                                  *Raw;
+  UINT8                                  *Raw : itype(_Array_ptr<UINT8>) count(Header->HobLength);
 } EFI_PEI_HOB_POINTERS;
 
 #endif

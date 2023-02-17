@@ -688,9 +688,9 @@ FvHasBeenProcessed (
           has been added, NULL will return.
 
 **/
-KNOWN_HANDLE *
+_Itype_for_any(T) KNOWN_HANDLE *
 FvIsBeingProcessed (
-  IN  EFI_HANDLE  FvHandle
+  IN  EFI_HANDLE  FvHandle : itype(_Ptr<T>)
   )
 {
   EFI_STATUS                          Status;
@@ -712,7 +712,7 @@ FvIsBeingProcessed (
   // Get the FirmwareVolumeBlock protocol on that handle
   //
   FvNameGuidIsFound = FALSE;
-  Status            = CoreHandleProtocol (FvHandle, &gEfiFirmwareVolumeBlockProtocolGuid, (VOID **)&Fvb);
+  Status            = CoreHandleProtocol <void> (FvHandle , &gEfiFirmwareVolumeBlockProtocolGuid, (VOID **)&Fvb);
   if (!EFI_ERROR (Status)) {
     //
     // Get the full FV header based on FVB protocol.
@@ -798,10 +798,10 @@ FvIsBeingProcessed (
   @return Pointer to device path constructed from FvHandle and DriverName
 
 **/
-EFI_DEVICE_PATH_PROTOCOL *
+_Itype_for_any(T) EFI_DEVICE_PATH_PROTOCOL *
 CoreFvToDevicePath (
   IN  EFI_FIRMWARE_VOLUME2_PROTOCOL  *Fv,
-  IN  EFI_HANDLE                     FvHandle,
+  IN  EFI_HANDLE                     FvHandle : itype (_Ptr<T>),
   IN  EFI_GUID                       *DriverName
   )
 {
@@ -812,7 +812,7 @@ CoreFvToDevicePath (
   //
   // Remember the device path of the FV
   //
-  Status = CoreHandleProtocol (FvHandle, &gEfiDevicePathProtocolGuid, (VOID **)&FvDevicePath);
+  Status = CoreHandleProtocol <void> (FvHandle, &gEfiDevicePathProtocolGuid, (VOID **)&FvDevicePath);
   if (EFI_ERROR (Status)) {
     FileNameDevicePath = NULL;
   } else {
@@ -1140,7 +1140,7 @@ CoreProcessFvImageFile (
       //
       // Produce a FVB protocol for the file
       //
-      Status = ProduceFVBProtocolOnBuffer (
+      Status = ProduceFVBProtocolOnBuffer<void> (
                  (EFI_PHYSICAL_ADDRESS)(UINTN)FvHeader,
                  (UINT64)BufferSize,
                  FvHandle,
@@ -1205,7 +1205,8 @@ CoreFwVolEventProtocolNotify (
   EFI_STATUS                     GetNextFileStatus;
   EFI_FIRMWARE_VOLUME2_PROTOCOL  *Fv;
   EFI_DEVICE_PATH_PROTOCOL       *FvDevicePath;
-  EFI_HANDLE                     FvHandle;
+  //EFI_HANDLE                     FvHandle;
+  _Ptr<void> 			 FvHandle = NULL;
   UINTN                          BufferSize;
   EFI_GUID                       NameGuid;
   UINTN                          Key;
@@ -1231,7 +1232,7 @@ CoreFwVolEventProtocolNotify (
                    NULL,
                    mFwVolEventRegistration,
                    &BufferSize,
-                   &FvHandle
+                   (EFI_HANDLE*)&FvHandle
                    );
     if (EFI_ERROR (Status)) {
       //
@@ -1240,7 +1241,7 @@ CoreFwVolEventProtocolNotify (
       return;
     }
 
-    if (FvHasBeenProcessed (FvHandle)) {
+    if (FvHasBeenProcessed ((EFI_HANDLE)FvHandle)) {
       //
       // This Fv has already been processed so lets skip it!
       //
@@ -1259,7 +1260,7 @@ CoreFwVolEventProtocolNotify (
       continue;
     }
 
-    Status = CoreHandleProtocol (FvHandle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Fv);
+    Status = CoreHandleProtocol <void> (FvHandle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Fv);
     if (EFI_ERROR (Status) || (Fv == NULL)) {
       //
       // FvHandle must have Firmware Volume2 protocol thus we should never get here.
@@ -1268,7 +1269,7 @@ CoreFwVolEventProtocolNotify (
       continue;
     }
 
-    Status = CoreHandleProtocol (FvHandle, &gEfiDevicePathProtocolGuid, (VOID **)&FvDevicePath);
+    Status = CoreHandleProtocol <void> (FvHandle, &gEfiDevicePathProtocolGuid, (VOID **)&FvDevicePath);
     if (EFI_ERROR (Status)) {
       //
       // The Firmware volume doesn't have device path, can't be dispatched.
@@ -1314,7 +1315,7 @@ CoreFwVolEventProtocolNotify (
                 gDxeCoreLoadedImage->FilePath = DuplicateDevicePath (
                                                   (EFI_DEVICE_PATH_PROTOCOL *)&mFvDevicePath
                                                   );
-                gDxeCoreLoadedImage->DeviceHandle = FvHandle;
+                gDxeCoreLoadedImage->DeviceHandle = (EFI_HANDLE)FvHandle;
               }
             }
           } else if (Type == EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE) {
@@ -1367,19 +1368,19 @@ CoreFwVolEventProtocolNotify (
               //
               // If no depex section, produce a firmware volume block protocol for it so it gets dispatched from.
               //
-              CoreProcessFvImageFile (Fv, FvHandle, &NameGuid);
+              CoreProcessFvImageFile (Fv, (EFI_HANDLE) FvHandle, &NameGuid);
             } else {
               //
               // If depex section is found, this FV image will be dispatched until its depex is evaluated to TRUE.
               //
               FreePool (DepexBuffer);
-              CoreAddToDriverList (Fv, FvHandle, &NameGuid, Type);
+              CoreAddToDriverList (Fv, (EFI_HANDLE) FvHandle, &NameGuid, Type);
             }
           } else {
             //
             // Transition driver from Undiscovered to Discovered state
             //
-            CoreAddToDriverList (Fv, FvHandle, &NameGuid, Type);
+            CoreAddToDriverList (Fv, (EFI_HANDLE) FvHandle, &NameGuid, Type);
           }
         }
       } while (!EFI_ERROR (GetNextFileStatus));

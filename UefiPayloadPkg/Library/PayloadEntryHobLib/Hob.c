@@ -6,7 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
+#define __checkedc__
 #include <PiPei.h>
 
 #include <Library/BaseLib.h>
@@ -15,7 +15,12 @@
 #include <Library/HobLib.h>
 #include <Library/PcdLib.h>
 
-VOID  *mHobList;
+#ifdef __checkedc__
+	void* mHobList : itype(_Array_ptr<void>)= NULL;
+#else
+	VOID  *mHobList;
+#endif
+
 
 /**
   Returns the pointer to the HOB list.
@@ -25,6 +30,18 @@ VOID  *mHobList;
   @return The pointer to the HOB list.
 
 **/
+#ifdef __checkedc__
+_Array_ptr<void>
+EFIAPI
+GetHobList (
+  VOID
+  ) _Checked
+{
+  ASSERT (mHobList != NULL);
+  return mHobList;
+}
+
+#else
 VOID *
 EFIAPI
 GetHobList (
@@ -34,6 +51,7 @@ GetHobList (
   ASSERT (mHobList != NULL);
   return mHobList;
 }
+#endif
 
 /**
   Build a Handoff Information Table HOB
@@ -108,7 +126,11 @@ CreateHob (
   EFI_PHYSICAL_ADDRESS        FreeMemory;
   VOID                        *Hob;
 
+#ifdef __checkedc__
+  HandOffHob = (EFI_HOB_HANDOFF_INFO_TABLE *)GetHobList ();
+#else
   HandOffHob = GetHobList ();
+#endif
 
   HobLength = (UINT16)((HobLength + 0x7) & (~0x7));
 
@@ -183,11 +205,19 @@ BuildResourceDescriptorHob (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
-VOID *
+#ifdef __checkedc__
+_Array_ptr<VOID>
+#else
+VOID*
+#endif
 EFIAPI
 GetNextHob (
   IN UINT16      Type,
+#ifdef __checkedc__
+  IN CONST VOID* HobStart : itype(_Array_ptr<const VOID>)
+#else
   IN CONST VOID  *HobStart
+#endif
   )
 {
   EFI_PEI_HOB_POINTERS  Hob;
@@ -220,13 +250,17 @@ GetNextHob (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
-VOID *
+_Array_ptr<VOID>
 EFIAPI
 GetFirstHob (
   IN UINT16  Type
-  )
+  ) _Checked
 {
-  VOID  *HobList;
+#ifdef __checkedc__
+	_Array_ptr<void> HobList=NULL;
+#else
+	VOID  *HobList;
+#endif
 
   HobList = GetHobList ();
   return GetNextHob (Type, HobList);
@@ -255,19 +289,37 @@ VOID *
 EFIAPI
 GetNextGuidHob (
   IN CONST EFI_GUID  *Guid,
+#ifdef __checkedc__
+  IN CONST _Array_ptr<VOID> HobStart
+#else
   IN CONST VOID      *HobStart
+#endif
   )
 {
   EFI_PEI_HOB_POINTERS  GuidHob;
 
   GuidHob.Raw = (UINT8 *)HobStart;
-  while ((GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw)) != NULL) {
+
+#ifdef __checkedc_
+_Bundled{
+        GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw);
+        GuidHob.Header->HobLength = 0;
+  }
+  while (GuidHob.Raw != NULL) {
     if (CompareGuid (Guid, &GuidHob.Guid->Name)) {
       break;
     }
-
     GuidHob.Raw = GET_NEXT_HOB (GuidHob);
+    GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw);
   }
+#else
+  while ((GuidHob.Raw = (UINT8 *)GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw)) != NULL) {
+    if (CompareGuid (Guid, &GuidHob.Guid->Name)) {
+      break;
+    }
+        GuidHob.Raw = GET_NEXT_HOB (GuidHob);
+  }
+#endif
 
   return GuidHob.Raw;
 }
@@ -286,13 +338,17 @@ GetNextGuidHob (
   @return The first instance of the matched GUID HOB among the whole HOB list.
 
 **/
-VOID *
+_Array_ptr<VOID>
 EFIAPI
 GetFirstGuidHob (
   IN CONST EFI_GUID  *Guid
   )
 {
+#ifdef __checkedc__
+  _Array_ptr<void> HobList = NULL;
+#else
   VOID  *HobList;
+#endif
 
   HobList = GetHobList ();
   return GetNextGuidHob (Guid, HobList);
@@ -611,7 +667,37 @@ UpdateStackHob (
 {
   EFI_PEI_HOB_POINTERS  Hob;
 
+#ifdef __checkedc__
+  Hob.Raw = _Assume_bounds_cast<_Array_ptr<UINT8>>(GetHobList (), count(Hob.Header->HobLength));
+  Hob.Raw = _Assume_bounds_cast<_Array_ptr<UINT8>>(GetNextHob (EFI_HOB_TYPE_MEMORY_ALLOCATION, Hob.Raw), count(Hob.Header->HobLength));
+#else
   Hob.Raw = GetHobList ();
+#endif
+
+#ifdef __checkedc__
+  while (Hob.Raw != NULL) {
+    if (CompareGuid (&gEfiHobMemoryAllocStackGuid, &(Hob.MemoryAllocationStack->AllocDescriptor.Name))) {
+      //
+      // Build a new memory allocation HOB with old stack info with EfiConventionalMemory type
+      // to be reclaimed by DXE core.
+      //
+      BuildMemoryAllocationHob (
+        Hob.MemoryAllocationStack->AllocDescriptor.MemoryBaseAddress,
+        Hob.MemoryAllocationStack->AllocDescriptor.MemoryLength,
+        EfiConventionalMemory
+        );
+      //
+      // Update the BSP Stack Hob to reflect the new stack info.
+      //
+      Hob.MemoryAllocationStack->AllocDescriptor.MemoryBaseAddress = BaseAddress;
+      Hob.MemoryAllocationStack->AllocDescriptor.MemoryLength      = Length;
+      break;
+    }
+
+    Hob.Raw = GET_NEXT_HOB (Hob);
+    Hob.Raw = _Assume_bounds_cast<_Array_ptr<UINT8>>(GetNextHob (EFI_HOB_TYPE_MEMORY_ALLOCATION, Hob.Raw), count(Hob.Header->HobLength));
+  }
+#else 
   while ((Hob.Raw = GetNextHob (EFI_HOB_TYPE_MEMORY_ALLOCATION, Hob.Raw)) != NULL) {
     if (CompareGuid (&gEfiHobMemoryAllocStackGuid, &(Hob.MemoryAllocationStack->AllocDescriptor.Name))) {
       //
@@ -633,8 +719,8 @@ UpdateStackHob (
 
     Hob.Raw = GET_NEXT_HOB (Hob);
   }
+#endif
 }
-
 /**
   Builds a HOB for the memory allocation.
 

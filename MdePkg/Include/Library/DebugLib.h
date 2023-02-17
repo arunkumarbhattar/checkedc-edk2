@@ -201,9 +201,9 @@ DebugBPrint (
 VOID
 EFIAPI
 DebugAssert (
-  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *FileName : itype(_Nt_array_ptr<const char>),
   IN UINTN        LineNumber,
-  IN CONST CHAR8  *Description
+  IN CONST CHAR8  *Description : itype(_Nt_array_ptr<const char>)
   );
 
 /**

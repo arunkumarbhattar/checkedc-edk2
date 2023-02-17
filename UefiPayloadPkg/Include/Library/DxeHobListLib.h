@@ -21,6 +21,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// Cache copy of the start of HOB list
 ///
-extern VOID  *gHobList;
+extern VOID  *gHobList : itype(_Ptr<VOID>);
 
 #endif

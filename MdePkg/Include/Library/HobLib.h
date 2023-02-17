@@ -32,11 +32,19 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   @return The pointer to the HOB list.
 
 **/
-VOID *
+#ifdef __checkedc__
+_Checked _Array_ptr<void> 
 EFIAPI
 GetHobList (
   VOID
   );
+#else
+void*
+EFIAPI
+GetHobList (
+  VOID
+  );
+#endif
 
 /**
   Returns the next instance of a HOB type from the starting HOB.
@@ -55,11 +63,19 @@ GetHobList (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
+#ifdef __checkedc__
+_Array_ptr<VOID>
+#else
 VOID *
+#endif
 EFIAPI
 GetNextHob (
   IN UINT16      Type,
+#ifdef __checkedc__
+  IN CONST VOID* HobStart : itype(_Array_ptr<const VOID>)
+#else
   IN CONST VOID  *HobStart
+#endif
   );
 
 /**
@@ -75,11 +91,20 @@ GetNextHob (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
-VOID *
+#ifdef __checkedc__
+_Checked _Array_ptr<VOID>
 EFIAPI
 GetFirstHob (
   IN UINT16  Type
   );
+#else
+VOID*
+EFIAPI
+GetFirstHob (
+  IN UINT16  Type
+  );
+#endif
+
 
 /**
   Returns the next instance of the matched GUID HOB from the starting HOB.
@@ -107,7 +132,11 @@ VOID *
 EFIAPI
 GetNextGuidHob (
   IN CONST EFI_GUID  *Guid,
+#ifdef __checkedc__
+  IN CONST _Array_ptr<VOID> HobStart
+#else
   IN CONST VOID      *HobStart
+#endif
   );
 
 /**
@@ -128,7 +157,11 @@ GetNextGuidHob (
   @return The first instance of the matched GUID HOB among the whole HOB list.
 
 **/
-VOID *
+#ifdef __checkedc__
+_Array_ptr<VOID> 
+#else
+VOID*
+#endif
 EFIAPI
 GetFirstGuidHob (
   IN CONST EFI_GUID  *Guid

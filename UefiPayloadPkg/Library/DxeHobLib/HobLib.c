@@ -5,7 +5,7 @@ Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
+#define __checkedc__
 #include <PiDxe.h>
 
 #include <Library/HobLib.h>
@@ -29,6 +29,19 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   @return The pointer to the HOB list.
 
 **/
+
+#ifdef __checkedc__
+_Array_ptr<VOID>
+EFIAPI
+GetHobList (
+  VOID
+  )
+_Checked
+{
+  ASSERT (gHobList != NULL);
+  return gHobList;
+}
+#else
 VOID *
 EFIAPI
 GetHobList (
@@ -38,6 +51,7 @@ GetHobList (
   ASSERT (gHobList != NULL);
   return gHobList;
 }
+#endif
 
 /**
   Returns the next instance of a HOB type from the starting HOB.
@@ -56,12 +70,16 @@ GetHobList (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
+#ifdef __checkedc__
+_Array_ptr<VOID>
+#else
 VOID *
+#endif
 EFIAPI
 GetNextHob (
   IN UINT16      Type,
-  IN CONST VOID  *HobStart
-  )
+  IN CONST VOID  *HobStart : itype(_Array_ptr<const void>)
+  ) 
 {
   EFI_PEI_HOB_POINTERS  Hob;
 
@@ -95,13 +113,17 @@ GetNextHob (
   @return The next instance of a HOB type from the starting HOB.
 
 **/
-VOID *
+_Checked _Array_ptr<VOID>
 EFIAPI
 GetFirstHob (
   IN UINT16  Type
   )
 {
-  VOID  *HobList;
+#ifdef __checkedc__
+	_Array_ptr<void> HobList = NULL;
+#else
+ 	 VOID  *HobList;
+#endif
 
   HobList = GetHobList ();
   return GetNextHob (Type, HobList);
@@ -133,19 +155,37 @@ VOID *
 EFIAPI
 GetNextGuidHob (
   IN CONST EFI_GUID  *Guid,
+#ifdef __checkedc__
+  IN CONST _Array_ptr<VOID> HobStart
+#else
   IN CONST VOID      *HobStart
+#endif
   )
 {
   EFI_PEI_HOB_POINTERS  GuidHob;
 
   GuidHob.Raw = (UINT8 *)HobStart;
-  while ((GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw)) != NULL) {
+
+#ifdef __checkedc_
+_Bundled{
+        GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw);
+        GuidHob.Header->HobLength = 0;
+  }
+  while (GuidHob.Raw != NULL) {
     if (CompareGuid (Guid, &GuidHob.Guid->Name)) {
       break;
     }
-
     GuidHob.Raw = GET_NEXT_HOB (GuidHob);
+    GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw);
   }
+#else
+  while ((GuidHob.Raw = (UINT8 *)GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw)) != NULL) {
+    if (CompareGuid (Guid, &GuidHob.Guid->Name)) {
+      break;
+    }
+        GuidHob.Raw = GET_NEXT_HOB (GuidHob);
+  }
+#endif
 
   return GuidHob.Raw;
 }
@@ -168,13 +208,21 @@ GetNextGuidHob (
   @return The first instance of the matched GUID HOB among the whole HOB list.
 
 **/
-VOID *
+#ifdef __checkedc__
+_Array_ptr<VOID>
+#else
+VOID*
+#endif
 EFIAPI
 GetFirstGuidHob (
   IN CONST EFI_GUID  *Guid
   )
 {
+#ifdef __checkedc__
+  _Array_ptr<void> HobList = NULL;
+#else
   VOID  *HobList;
+#endif
 
   HobList = GetHobList ();
   return GetNextGuidHob (Guid, HobList);

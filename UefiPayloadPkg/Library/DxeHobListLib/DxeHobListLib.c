@@ -9,7 +9,7 @@
 
 #include <Uefi.h>
 
-VOID  *gHobList = NULL;
+VOID  *gHobList : itype(_Ptr<void>)= NULL;
 
 /**
   Local implementation of GUID comparasion that doesn't depend on DebugLib::ASSERT().
