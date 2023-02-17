@@ -428,13 +428,14 @@ GetFvbAuthenticationStatus (
                                  buffer.
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 ProduceFVBProtocolOnBuffer (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT EFI_HANDLE           *FvProtocol  OPTIONAL
+  OUT EFI_HANDLE           *FvProtocol  : itype (_Ptr<_Ptr<T>>) OPTIONAL
+  //OUT _Ptr<_Ptr<T>>         FvProtocol  OPTIONAL
   )
 {
   EFI_STATUS                  Status;
@@ -610,6 +611,7 @@ ProduceFVBProtocolOnBuffer (
   // If they want the handle back, set it.
   //
   if (FvProtocol != NULL) {
+    //*FvProtocol = FvbDev->Handle;
     *FvProtocol = FvbDev->Handle;
   }
 
@@ -661,7 +663,9 @@ FwVolBlockDriverInit (
     //
     // Produce an FVB protocol for it
     //
-    ProduceFVBProtocolOnBuffer (FvHob.FirmwareVolume->BaseAddress, FvHob.FirmwareVolume->Length, NULL, AuthenticationStatus, NULL);
+    //ProduceFVBProtocolOnBuffer (FvHob.FirmwareVolume->BaseAddress, FvHob.FirmwareVolume->Length, NULL, AuthenticationStatus, NULL);
+    ProduceFVBProtocolOnBuffer <void>(FvHob.FirmwareVolume->BaseAddress, FvHob.FirmwareVolume->Length, NULL, AuthenticationStatus, NULL);
+    
     FvHob.Raw = GET_NEXT_HOB (FvHob);
   }
 
@@ -689,12 +693,13 @@ FwVolBlockDriverInit (
                                  firmware volume
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreProcessFirmwareVolume (
   IN VOID         *FvHeader,
   IN UINTN        Size,
-  OUT EFI_HANDLE  *FVProtocolHandle
+  //OUT EFI_HANDLE  *FVProtocolHandle : itype(_Ptr<_Ptr<T>>)
+  OUT _Ptr<_Ptr<T>>      FVProtocolHandle
   )
 {
   VOID        *Ptr;
@@ -706,7 +711,7 @@ CoreProcessFirmwareVolume (
                         (UINT64)Size,
                         NULL,
                         0,
-                        FVProtocolHandle
+                        (EFI_HANDLE*)FVProtocolHandle
                         );
   //
   // Since in our implementation we use register-protocol-notify to put a
@@ -719,7 +724,7 @@ CoreProcessFirmwareVolume (
   if (!EFI_ERROR (Status)) {
     ASSERT (*FVProtocolHandle != NULL);
     Ptr    = NULL;
-    Status = CoreHandleProtocol (*FVProtocolHandle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Ptr);
+    Status = CoreHandleProtocol <void> (*FVProtocolHandle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Ptr);
     if (EFI_ERROR (Status) || (Ptr == NULL)) {
       return EFI_VOLUME_CORRUPTED;
     }

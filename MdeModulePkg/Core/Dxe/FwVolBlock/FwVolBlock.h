@@ -11,8 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define _FWVOL_BLOCK_H_
 
 #define FVB_DEVICE_SIGNATURE  SIGNATURE_32('_','F','V','B')
-#define checkedc
-
+#include "/home/arun/checkedc-edk2/MdePkg/Include/Protocol/FirmwareVolumeBlock.h"
 typedef struct {
   UINTN    Base;
   UINTN    Length;
