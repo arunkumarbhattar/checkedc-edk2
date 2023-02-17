@@ -789,10 +789,11 @@ CoreUninstallProtocolInterface (
   @return The requested protocol interface for the handle
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreHandleProtocol (
-  IN EFI_HANDLE  UserHandle,
+  IN EFI_HANDLE  UserHandle : itype(_Ptr<T>),
+  //IN _Ptr<T>     UserHandle,
   IN EFI_GUID    *Protocol,
   OUT VOID       **Interface
   );
@@ -2460,13 +2461,13 @@ GetFvbAuthenticationStatus (
                                  buffer.
 
 **/
-EFI_STATUS
+_For_any(T) EFI_STATUS
 ProduceFVBProtocolOnBuffer (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT EFI_HANDLE           *FvProtocol  OPTIONAL
+  OUT _Ptr<_Ptr<T>>        *FvProtocol  OPTIONAL
   );
 
 /**

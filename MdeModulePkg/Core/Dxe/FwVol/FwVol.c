@@ -581,7 +581,8 @@ NotifyFwVolBlock (
   IN  VOID       *Context
   )
 {
-  EFI_HANDLE                          Handle;
+  //EFI_HANDLE                          Handle;
+  _Ptr<void> Handle = NULL;
   EFI_STATUS                          Status;
   UINTN                               BufferSize;
   EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *Fvb;
@@ -602,7 +603,7 @@ NotifyFwVolBlock (
                    NULL,
                    gEfiFwVolBlockNotifyReg,
                    &BufferSize,
-                   &Handle
+                   (EFI_HANDLE*) &Handle
                    );
 
     //
@@ -619,7 +620,7 @@ NotifyFwVolBlock (
     //
     // Get the FirmwareVolumeBlock protocol on that handle
     //
-    Status = CoreHandleProtocol (Handle, &gEfiFirmwareVolumeBlockProtocolGuid, (VOID **)&Fvb);
+    Status = CoreHandleProtocol <void>(Handle, &gEfiFirmwareVolumeBlockProtocolGuid, (VOID **)&Fvb);
     ASSERT_EFI_ERROR (Status);
     ASSERT (Fvb != NULL);
 
@@ -641,7 +642,7 @@ NotifyFwVolBlock (
     //
     // Check if there is an FV protocol already installed in that handle
     //
-    Status = CoreHandleProtocol (Handle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Fv);
+    Status = CoreHandleProtocol <void> (Handle, &gEfiFirmwareVolume2ProtocolGuid, (VOID **)&Fv);
     if (!EFI_ERROR (Status)) {
       //
       // Update Fv to use a new Fvb
@@ -663,7 +664,7 @@ NotifyFwVolBlock (
       }
 
       FvDevice->Fvb             = Fvb;
-      FvDevice->Handle          = Handle;
+      FvDevice->Handle          = (EFI_HANDLE)Handle;
       FvDevice->FwVolHeader     = FwVolHeader;
       FvDevice->IsFfs3Fv        = CompareGuid (&FwVolHeader->FileSystemGuid, &gEfiFirmwareFileSystem3Guid);
       FvDevice->Fv.ParentHandle = Fvb->ParentHandle;
@@ -677,7 +678,7 @@ NotifyFwVolBlock (
         // Install an New FV protocol on the existing handle
         //
         Status = CoreInstallProtocolInterface (
-                   &Handle,
+                   (EFI_HANDLE)&Handle,
                    &gEfiFirmwareVolume2ProtocolGuid,
                    EFI_NATIVE_INTERFACE,
                    &FvDevice->Fv
