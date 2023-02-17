@@ -698,8 +698,7 @@ EFIAPI
 CoreProcessFirmwareVolume (
   IN VOID         *FvHeader,
   IN UINTN        Size,
-  //OUT EFI_HANDLE  *FVProtocolHandle : itype(_Ptr<_Ptr<T>>)
-  OUT _Ptr<_Ptr<T>>      FVProtocolHandle
+  OUT EFI_HANDLE  *FVProtocolHandle : itype(_Ptr<_Ptr<T>>)
   )
 {
   VOID        *Ptr;

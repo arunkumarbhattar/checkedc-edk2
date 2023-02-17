@@ -580,11 +580,7 @@ CoreConnectSingleController (
   //
   // Free the Driver Binding Handle Buffer
   //
-<<<<<<< HEAD
-  CoreFreePool ((void*)*DriverBindingHandleBuffer);
-=======
   CoreFreePool ((void*)DriverBindingHandleBuffer);
->>>>>>> 0865b1f0e1ab35f611347b97af2758cdfea9dbe2
 
   //
   // If the number of Driver Binding Protocols has increased since this function started, then return

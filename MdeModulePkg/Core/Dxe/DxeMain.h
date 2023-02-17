@@ -2022,12 +2022,12 @@ InitializeSectionExtraction (
                                  firmware volume
 
 **/
-EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 EFIAPI
 CoreProcessFirmwareVolume (
   IN VOID         *FvHeader,
   IN UINTN        Size,
-  OUT EFI_HANDLE  *FVProtocolHandle
+  OUT EFI_HANDLE  *FVProtocolHandle : itype(_Ptr<_Ptr<T>>)
   );
 
 //
@@ -2461,13 +2461,14 @@ GetFvbAuthenticationStatus (
                                  buffer.
 
 **/
-_For_any(T) EFI_STATUS
+_Itype_for_any(T) EFI_STATUS
 ProduceFVBProtocolOnBuffer (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
   IN EFI_HANDLE            ParentHandle,
   IN UINT32                AuthenticationStatus,
-  OUT _Ptr<_Ptr<T>>        FvProtocol  OPTIONAL
+  OUT EFI_HANDLE           *FvProtocol  : itype (_Ptr<_Ptr<T>>) OPTIONAL
+  //OUT _Ptr<_Ptr<T>>         FvProtocol  OPTIONAL
   );
 
 /**
