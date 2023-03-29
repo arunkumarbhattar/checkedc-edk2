@@ -34,7 +34,7 @@
   DEFINE SOURCE_DEBUG_ENABLE     = FALSE
   DEFINE LOAD_X64_ON_IA32_ENABLE = FALSE
 
-!include OvmfPkg/OvmfTpmDefines.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmDefines.dsc.inc
 
   #
   # Shell can be useful for debugging but should not be enabled for production
@@ -182,7 +182,6 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLibDevicePathProtocol/UefiDevicePathLibDevicePathProtocol.inf
   NvVarsFileLib|OvmfPkg/Library/NvVarsFileLib/NvVarsFileLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
-  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   SerializeVariablesLib|OvmfPkg/Library/SerializeVariablesLib/SerializeVariablesLib.inf
@@ -252,11 +251,12 @@
   SmbusLib|MdePkg/Library/BaseSmbusLibNull/BaseSmbusLibNull.inf
   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
 
-!include OvmfPkg/OvmfTpmLibs.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmLibs.dsc.inc
 
 [LibraryClasses.common]
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
-  VmgExitLib|UefiCpuPkg/Library/VmgExitLibNull/VmgExitLibNull.inf
+  CcExitLib|UefiCpuPkg/Library/CcExitLibNull/CcExitLibNull.inf
+  TdxMailboxLib|OvmfPkg/Library/TdxMailboxLib/TdxMailboxLibNull.inf
 
 [LibraryClasses.common.SEC]
   TimerLib|OvmfPkg/Library/AcpiTimerLib/BaseRomAcpiTimerLib.inf
@@ -294,7 +294,7 @@
 !ifdef $(DEBUG_ON_SERIAL_PORT)
   DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
 !else
-  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformDebugLibIoPort.inf
+  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformRomDebugLibIoPort.inf
 !endif
   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
 
@@ -310,7 +310,7 @@
 !ifdef $(DEBUG_ON_SERIAL_PORT)
   DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
 !else
-  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformDebugLibIoPort.inf
+  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformRomDebugLibIoPort.inf
 !endif
   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
   ResourcePublicationLib|MdePkg/Library/PeiResourcePublicationLib/PeiResourcePublicationLib.inf
@@ -409,6 +409,7 @@
 !endif
   PciLib|OvmfPkg/Library/DxePciLibI440FxQ35/DxePciLibI440FxQ35.inf
   MpInitLib|UefiCpuPkg/Library/MpInitLib/DxeMpInitLib.inf
+  NestedInterruptTplLib|OvmfPkg/Library/NestedInterruptTplLib/NestedInterruptTplLib.inf
   QemuFwCfgS3Lib|OvmfPkg/Library/QemuFwCfgS3Lib/DxeQemuFwCfgS3LibFwCfg.inf
   QemuLoadImageLib|OvmfPkg/Library/X86QemuLoadImageLib/X86QemuLoadImageLib.inf
 
@@ -486,6 +487,9 @@
   gUefiCpuPkgTokenSpaceGuid.PcdCpuHotPlugSupport|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdEnableVariableRuntimeCache|FALSE
 !endif
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdRequireSelfSignedPk|TRUE
+!endif
 
 [PcdsFixedAtBuild]
   gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeMemorySize|1
@@ -555,7 +559,7 @@
   #
   # On Q35 machine types that QEMU intends to support in the long term, QEMU
   # never lets the RAM below 4 GB exceed 2816 MB.
-  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xB0000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
 
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   gEfiSourceLevelDebugPkgTokenSpaceGuid.PcdDebugLoadImageMethod|0x2
@@ -657,7 +661,7 @@
 
   gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x00
 
-!include OvmfPkg/OvmfTpmPcds.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmPcds.dsc.inc
 
   # IPv4 and IPv6 PXE Boot support.
   gEfiNetworkPkgTokenSpaceGuid.PcdIPv4PXESupport|0x01
@@ -671,7 +675,7 @@
 !endif
 
 [PcdsDynamicHii]
-!include OvmfPkg/OvmfTpmPcdsHii.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmPcdsHii.dsc.inc
 
 ################################################################################
 #
@@ -721,7 +725,7 @@
 !endif
   UefiCpuPkg/CpuMpPei/CpuMpPei.inf
 
-!include OvmfPkg/OvmfTpmComponentsPei.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmComponentsPei.dsc.inc
 
   #
   # DXE Phase modules
@@ -746,7 +750,7 @@
 !if $(SECURE_BOOT_ENABLE) == TRUE
       NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
 !endif
-!include OvmfPkg/OvmfTpmSecurityStub.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmSecurityStub.dsc.inc
   }
 
   MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
@@ -879,7 +883,7 @@
   # Network Support
   #
 !include NetworkPkg/NetworkComponents.dsc.inc
-!include OvmfPkg/NetworkComponents.dsc.inc
+!include OvmfPkg/Include/Dsc/NetworkComponents.dsc.inc
 
   OvmfPkg/VirtioNetDxe/VirtioNet.inf
 
@@ -984,7 +988,7 @@
   #
   OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesSmm.inf {
     <LibraryClasses>
-    VmgExitLib|UefiCpuPkg/Library/VmgExitLibNull/VmgExitLibNull.inf
+    CcExitLib|UefiCpuPkg/Library/CcExitLibNull/CcExitLibNull.inf
   }
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteSmm.inf
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmm.inf {
@@ -1014,7 +1018,7 @@
   #
   # TPM support
   #
-!include OvmfPkg/OvmfTpmComponentsDxe.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmComponentsDxe.dsc.inc
 
 !if $(LOAD_X64_ON_IA32_ENABLE) == TRUE
   OvmfPkg/CompatImageLoaderDxe/CompatImageLoaderDxe.inf

@@ -309,7 +309,15 @@ struct _LIST_ENTRY {
 ///
 /// NULL pointer (VOID *)
 ///
+#if defined (__cplusplus)
+  #if defined (_MSC_EXTENSIONS)
+#define NULL  nullptr
+  #else
+#define NULL  __null
+  #endif
+#else
 #define NULL  ((VOID *) 0)
+#endif
 
 //
 // Null character
@@ -760,7 +768,7 @@ typedef UINTN *BASE_LIST;
 **/
 #ifdef MDE_CPU_EBC
 #define STATIC_ASSERT(Expression, Message)
-#elif defined (_MSC_EXTENSIONS)
+#elif defined (_MSC_EXTENSIONS) || defined (__cplusplus)
 #define STATIC_ASSERT  static_assert
 #else
 #define STATIC_ASSERT  _Static_assert
@@ -788,9 +796,9 @@ STATIC_ASSERT (sizeof (L"A")    == 4, "sizeof (L\"A\") does not meet UEFI Specif
 //
 // The following three enum types are used to verify that the compiler
 // configuration for enum types is compliant with Section 2.3.1 of the
-// UEFI 2.3 Specification. These enum types and enum values are not
-// intended to be used. A prefix of '__' is used avoid conflicts with
-// other types.
+// UEFI 2.3.1 Errata C Specification. These enum types and enum values
+// are not intended to be used. A prefix of '__' is used avoid
+// conflicts with other types.
 //
 typedef enum {
   __VerifyUint8EnumValue = 0xff
@@ -801,12 +809,12 @@ typedef enum {
 } __VERIFY_UINT16_ENUM_SIZE;
 
 typedef enum {
-  __VerifyUint32EnumValue = 0xffffffff
-} __VERIFY_UINT32_ENUM_SIZE;
+  __VerifyInt32EnumValue = 0x7fffffff
+} __VERIFY_INT32_ENUM_SIZE;
 
 STATIC_ASSERT (sizeof (__VERIFY_UINT8_ENUM_SIZE) == 4, "Size of enum does not meet UEFI Specification Data Type requirements");
 STATIC_ASSERT (sizeof (__VERIFY_UINT16_ENUM_SIZE) == 4, "Size of enum does not meet UEFI Specification Data Type requirements");
-STATIC_ASSERT (sizeof (__VERIFY_UINT32_ENUM_SIZE) == 4, "Size of enum does not meet UEFI Specification Data Type requirements");
+STATIC_ASSERT (sizeof (__VERIFY_INT32_ENUM_SIZE) == 4, "Size of enum does not meet UEFI Specification Data Type requirements");
 
 /**
   Macro that returns a pointer to the data structure that contains a specified field of
@@ -959,7 +967,7 @@ typedef UINTN RETURN_STATUS;
 ///
 /// The operation completed successfully.
 ///
-#define RETURN_SUCCESS  0
+#define RETURN_SUCCESS  (RETURN_STATUS)(0)
 
 ///
 /// The image failed to load.

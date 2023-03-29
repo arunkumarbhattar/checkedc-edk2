@@ -1,7 +1,7 @@
 /** @file
   The CPU specific programming for PiSmmCpuDxeSmm module.
 
-  Copyright (c) 2010 - 2015, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2010 - 2023, Intel Corporation. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
@@ -17,10 +17,12 @@
 #include <Library/SmmCpuFeaturesLib.h>
 #include <Library/SmmServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/HobLib.h>
 #include <Pcd/CpuHotEjectData.h>
 #include <PiSmm.h>
 #include <Register/Intel/SmramSaveStateMap.h>
 #include <Register/QemuSmramSaveStateMap.h>
+#include <Guid/SmmBaseHob.h>
 
 //
 // EFER register LMA bit
@@ -43,6 +45,12 @@ SmmCpuFeaturesLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  //
+  // If gSmmBaseHobGuid found, means SmBase info has been relocated and recorded
+  // in the SmBase array. ASSERT it's not supported in OVMF.
+  //
+  ASSERT (GetFirstGuidHob (&gSmmBaseHobGuid) == NULL);
+
   //
   // No need to program SMRRs on our virtual platform.
   //
@@ -1347,35 +1355,4 @@ SmmCpuFeaturesCompleteSmmReadyToLock (
   VOID
   )
 {
-}
-
-/**
-  This API provides a method for a CPU to allocate a specific region for
-  storing page tables.
-
-  This API can be called more once to allocate memory for page tables.
-
-  Allocates the number of 4KB pages of type EfiRuntimeServicesData and returns
-  a pointer to the allocated buffer.  The buffer returned is aligned on a 4KB
-  boundary.  If Pages is 0, then NULL is returned.  If there is not enough
-  memory remaining to satisfy the request, then NULL is returned.
-
-  This function can also return NULL if there is no preference on where the
-  page tables are allocated in SMRAM.
-
-  @param  Pages                 The number of 4 KB pages to allocate.
-
-  @return A pointer to the allocated buffer for page tables.
-  @retval NULL      Fail to allocate a specific region for storing page tables,
-                    Or there is no preference on where the page tables are
-                    allocated in SMRAM.
-
-**/
-VOID *
-EFIAPI
-SmmCpuFeaturesAllocatePageTableMemory (
-  IN UINTN  Pages
-  )
-{
-  return NULL;
 }

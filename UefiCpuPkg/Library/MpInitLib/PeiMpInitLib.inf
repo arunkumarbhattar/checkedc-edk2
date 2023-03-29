@@ -49,11 +49,10 @@
   HobLib
   MtrrLib
   CpuLib
-  UefiCpuLib
   SynchronizationLib
   PeiServicesLib
   PcdLib
-  VmgExitLib
+  CcExitLib
   MicrocodeLib
 
 [Pcd]

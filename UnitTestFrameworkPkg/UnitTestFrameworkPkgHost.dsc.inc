@@ -14,6 +14,7 @@
   CpuLib|MdePkg/Library/BaseCpuLibNull/BaseCpuLibNull.inf
   CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLibNull/BaseCacheMaintenanceLibNull.inf
   CmockaLib|UnitTestFrameworkPkg/Library/CmockaLib/CmockaLib.inf
+  GoogleTestLib|UnitTestFrameworkPkg/Library/GoogleTestLib/GoogleTestLib.inf
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibCmocka.inf
   DebugLib|UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
   MemoryAllocationLib|UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
@@ -26,11 +27,13 @@
   GCC:*_*_*_CC_FLAGS   = -D UNIT_TESTING_DEBUG=1
   XCODE:*_*_*_CC_FLAGS = -D UNIT_TESTING_DEBUG=1
 !endif
-
+  GCC:*_GCC5_*_CC_FLAGS = --coverage
+  GCC:*_GCC5_*_DLINK_FLAGS = --coverage
 [BuildOptions.common.EDKII.HOST_APPLICATION]
   #
   # MSFT
   #
+  MSFT:*_*_*_CC_FLAGS               = /EHsc
   MSFT:*_*_*_DLINK_FLAGS            == /out:"$(BIN_DIR)\$(MODULE_NAME_GUID).exe" /pdb:"$(BIN_DIR)\$(MODULE_NAME_GUID).pdb" /IGNORE:4001 /NOLOGO /SUBSYSTEM:CONSOLE /DEBUG /STACK:0x40000,0x40000 /NODEFAULTLIB:libcmt.lib libcmtd.lib
   MSFT:*_*_IA32_DLINK_FLAGS         = /MACHINE:I386
   MSFT:*_*_X64_DLINK_FLAGS          = /MACHINE:AMD64
@@ -50,7 +53,7 @@
   #
   GCC:*_*_IA32_DLINK_FLAGS == -o $(BIN_DIR)/$(MODULE_NAME_GUID) -m32 -no-pie
   GCC:*_*_X64_DLINK_FLAGS  == -o $(BIN_DIR)/$(MODULE_NAME_GUID) -m64 -no-pie
-  GCC:*_*_*_DLINK2_FLAGS   == -lgcov
+  GCC:*_*_*_DLINK2_FLAGS   == -lgcov -lpthread -lstdc++ -lm
 
   #
   # Need to do this link via gcc and not ld as the pathing to libraries changes from OS version to OS version

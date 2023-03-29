@@ -14,11 +14,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // Include files
 //
 
-#if defined(__FreeBSD__)
-#include <uuid.h>
-#elif defined(__GNUC__)
-#include <uuid/uuid.h>
-#endif
 #ifdef __GNUC__
 #include <sys/stat.h>
 #endif
@@ -2397,7 +2392,7 @@ Returns:
   VerboseMsg("SecCore entry point Address = 0x%llX", (unsigned long long) SecCoreEntryAddress);
   VerboseMsg("BaseAddress = 0x%llX", (unsigned long long) FvInfo->BaseAddress);
   bSecCore = (UINT32)(SecCoreEntryAddress - FvInfo->BaseAddress);
-  VerboseMsg("offset = 0x%llX", bSecCore);
+  VerboseMsg("offset = 0x%X", bSecCore);
 
   if(bSecCore > 0x0fffff) {
     Error(NULL, 0, 3000, "Invalid", "SEC Entry point must be within 1MB of start of the FV");

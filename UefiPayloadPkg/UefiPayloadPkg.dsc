@@ -3,7 +3,7 @@
 #
 # Provides drivers and definitions to create uefi payload for bootloaders.
 #
-# Copyright (c) 2014 - 2022, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2014 - 2023, Intel Corporation. All rights reserved.<BR>
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -59,7 +59,7 @@
   #
   # CPU options
   #
-  DEFINE MAX_LOGICAL_PROCESSORS       = 256
+  DEFINE MAX_LOGICAL_PROCESSORS       = 1024
 
   #
   # PCI options
@@ -221,7 +221,6 @@
   UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
-  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
   SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
 
   #
@@ -301,7 +300,7 @@
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
   VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
-  VmgExitLib|UefiCpuPkg/Library/VmgExitLibNull/VmgExitLibNull.inf
+  CcExitLib|UefiCpuPkg/Library/CcExitLibNull/CcExitLibNull.inf
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
 
 [LibraryClasses.common]
@@ -340,6 +339,7 @@
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
 !endif
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/DxeCpuExceptionHandlerLib.inf
+  CpuPageTableLib|UefiCpuPkg/Library/CpuPageTableLib/CpuPageTableLib.inf
   MpInitLib|UefiCpuPkg/Library/MpInitLib/DxeMpInitLib.inf
 !if $(PERFORMANCE_MEASUREMENT_ENABLE)
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
@@ -471,8 +471,6 @@
 !endif
 
 [PcdsPatchableInModule.X64]
-  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcIndexRegister|$(RTC_INDEX_REGISTER)
-  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcTargetRegister|$(RTC_TARGET_REGISTER)
 !if $(NETWORK_DRIVER_ENABLE) == TRUE
   gEfiNetworkPkgTokenSpaceGuid.PcdAllowHttpConnections|TRUE
 !endif
@@ -530,14 +528,14 @@
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity|$(UART_DEFAULT_PARITY)
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits|$(UART_DEFAULT_STOP_BITS)
   gEfiMdePkgTokenSpaceGuid.PcdDefaultTerminalType|$(DEFAULT_TERMINAL_TYPE)
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport
-  gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSystemPageSize
-  gUefiCpuPkgTokenSpaceGuid.PcdCpuApInitTimeOutInMicroSeconds
-  gUefiCpuPkgTokenSpaceGuid.PcdCpuApLoopMode
-  gUefiCpuPkgTokenSpaceGuid.PcdCpuMicrocodePatchAddress
-  gUefiCpuPkgTokenSpaceGuid.PcdCpuMicrocodePatchRegionSize
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSystemPageSize|0x1
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuApInitTimeOutInMicroSeconds|50000
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuApLoopMode|1
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuMicrocodePatchAddress|0x0
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuMicrocodePatchRegionSize|0x0
 !if ($(TARGET) == DEBUG || $(USE_CBMEM_FOR_CONSOLE) == TRUE)
   gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeUseSerial|TRUE
 !else
@@ -578,6 +576,9 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdTestKeyUsed|FALSE
   gUefiCpuPkgTokenSpaceGuid.PcdSevEsIsEnabled|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdPciDisableBusEnumeration|TRUE
+
+  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcIndexRegister|$(RTC_INDEX_REGISTER)
+  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcTargetRegister|$(RTC_TARGET_REGISTER)
 
 ################################################################################
 #

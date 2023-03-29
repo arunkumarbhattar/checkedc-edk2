@@ -1,7 +1,7 @@
 /** @file
 Code for Processor S3 restoration
 
-Copyright (c) 2006 - 2021, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2006 - 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -783,7 +783,11 @@ SmmRestoreCpu (
   SmmS3ResumeState = mSmmS3ResumeState;
   ASSERT (SmmS3ResumeState != NULL);
 
-  if (SmmS3ResumeState->Signature == SMM_S3_RESUME_SMM_64) {
+  //
+  // Setup 64bit IDT in 64bit SMM env when called from 32bit PEI.
+  // Note: 64bit PEI and 32bit DXE is not a supported combination.
+  //
+  if ((SmmS3ResumeState->Signature == SMM_S3_RESUME_SMM_64) && (FeaturePcdGet (PcdDxeIplSwitchToLongMode) == TRUE)) {
     //
     // Save the IA32 IDT Descriptor
     //
@@ -819,10 +823,23 @@ SmmRestoreCpu (
     InitializeCpuBeforeRebase ();
   }
 
+  DEBUG ((DEBUG_INFO, "SmmRestoreCpu: mSmmRelocated is %d\n", mSmmRelocated));
+
   //
-  // Restore SMBASE for BSP and all APs
+  // Check whether Smm Relocation is done or not.
+  // If not, will do the SmmBases Relocation here!!!
   //
-  SmmRelocateBases ();
+  if (!mSmmRelocated) {
+    //
+    // Restore SMBASE for BSP and all APs
+    //
+    SmmRelocateBases ();
+  } else {
+    //
+    // Issue SMI IPI (All Excluding  Self SMM IPI + BSP SMM IPI) to execute first SMI init.
+    //
+    ExecuteFirstSmiInit ();
+  }
 
   //
   // Skip initialization if mAcpiCpuData is not valid
@@ -846,9 +863,10 @@ SmmRestoreCpu (
   DEBUG ((DEBUG_INFO, "SMM S3 Return Stack Pointer     = %x\n", SmmS3ResumeState->ReturnStackPointer));
 
   //
-  // If SMM is in 32-bit mode, then use SwitchStack() to resume PEI Phase
+  // If SMM is in 32-bit mode or PcdDxeIplSwitchToLongMode is FALSE, then use SwitchStack() to resume PEI Phase.
+  // Note: 64bit PEI and 32bit DXE is not a supported combination.
   //
-  if (SmmS3ResumeState->Signature == SMM_S3_RESUME_SMM_32) {
+  if ((SmmS3ResumeState->Signature == SMM_S3_RESUME_SMM_32) || (FeaturePcdGet (PcdDxeIplSwitchToLongMode) == FALSE)) {
     DEBUG ((DEBUG_INFO, "Call SwitchStack() to return to S3 Resume in PEI Phase\n"));
 
     SwitchStack (
