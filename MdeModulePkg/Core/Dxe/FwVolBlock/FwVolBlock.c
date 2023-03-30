@@ -184,71 +184,77 @@ FwVolBlockEraseBlock (
 
 **/
 EFI_STATUS
-EFIAPI
+        EFIAPI
 FwVolBlockReadBlock (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN CONST  EFI_LBA                             Lba,
-  IN CONST  UINTN                               Offset,
-  IN OUT    UINTN                               *NumBytes,
-  IN OUT    UINT8                               *Buffer
-  )
+        IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
+IN CONST  EFI_LBA                             Lba,
+        IN CONST  UINTN                               Offset,
+IN OUT    UINTN                               *NumBytes : itype(_Ptr<UINTN>),
+        IN OUT    UINT8                               *Buffer : itype(_Array_ptr<UINT8>) byte_count(*NumBytes)
+)
 {
-  EFI_FW_VOL_BLOCK_DEVICE     *FvbDevice;
-  EFI_FIRMWARE_VOLUME_HEADER  *FwVolHeader;
-  UINT8                       *LbaOffset;
-  UINTN                       LbaStart;
-  UINTN                       NumOfBytesRead;
-  UINTN                       LbaIndex;
+EFI_FW_VOL_BLOCK_DEVICE     *FvbDevice;
+EFI_FIRMWARE_VOLUME_HEADER  *FwVolHeader;
+UINTN                       LbaStart;
+UINTN                       NumOfBytesRead;
+_Array_ptr<UINT8>           LbaOffset : count(NumOfBytesRead) = NULL;
+UINTN                       LbaIndex;
 
-  FvbDevice = FVB_DEVICE_FROM_THIS (This);
+FvbDevice = FVB_DEVICE_FROM_THIS (This);
 
-  //
-  // Check if This FW can be read
-  //
-  if ((FvbDevice->FvbAttributes & EFI_FVB2_READ_STATUS) == 0) {
-    return EFI_ACCESS_DENIED;
-  }
+//
+// Check if This FW can be read
+//
+if ((FvbDevice->FvbAttributes & EFI_FVB2_READ_STATUS) == 0) {
+return EFI_ACCESS_DENIED;
+}
 
-  LbaIndex = (UINTN)Lba;
-  if (LbaIndex >= FvbDevice->NumBlocks) {
-    //
-    // Invalid Lba, read nothing.
-    //
-    *NumBytes = 0;
-    return EFI_BAD_BUFFER_SIZE;
-  }
+LbaIndex = (UINTN)Lba;
+if (LbaIndex >= FvbDevice->NumBlocks) {
+//
+// Invalid Lba, read nothing.
+//
+*NumBytes = 0;
+return EFI_BAD_BUFFER_SIZE;
+}
 
-  if (Offset > FvbDevice->LbaCache[LbaIndex].Length) {
-    //
-    // all exceed boundary, read nothing.
-    //
-    *NumBytes = 0;
-    return EFI_BAD_BUFFER_SIZE;
-  }
+if (Offset > FvbDevice->LbaCache[LbaIndex].Length) {
+//
+// all exceed boundary, read nothing.
+//
+*NumBytes = 0;
+return EFI_BAD_BUFFER_SIZE;
+}
 
-  NumOfBytesRead = *NumBytes;
-  if (Offset + NumOfBytesRead > FvbDevice->LbaCache[LbaIndex].Length) {
-    //
-    // partial exceed boundary, read data from current postion to end.
-    //
+_Bundled{
+    NumOfBytesRead = *NumBytes;
+    LbaOffset = NULL;
+}
+
+if (Offset + NumOfBytesRead > FvbDevice->LbaCache[LbaIndex].Length) {
+//
+// partial exceed boundary, read data from current postion to end.
+//
+_Bundled{
     NumOfBytesRead = FvbDevice->LbaCache[LbaIndex].Length - Offset;
-  }
+    LbaOffset = NULL;
+}
+}
 
-  LbaStart    = FvbDevice->LbaCache[LbaIndex].Base;
-  FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)((UINTN)FvbDevice->BaseAddress);
-  LbaOffset   = (UINT8 *)FwVolHeader + LbaStart + Offset;
+LbaStart    = FvbDevice->LbaCache[LbaIndex].Base;
+FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)((UINTN)FvbDevice->BaseAddress);
+LbaOffset =  _Assume_bounds_cast<_Array_ptr<UINT8>>(FwVolHeader + LbaStart + Offset, count(NumOfBytesRead));
+//
+// Perform read operation
+//
+CopyMem (Buffer, LbaOffset, NumOfBytesRead);
 
-  //
-  // Perform read operation
-  //
-  CopyMem (Buffer, LbaOffset, NumOfBytesRead);
+if (NumOfBytesRead == *NumBytes) {
+return EFI_SUCCESS;
+}
 
-  if (NumOfBytesRead == *NumBytes) {
-    return EFI_SUCCESS;
-  }
-
-  *NumBytes = NumOfBytesRead;
-  return EFI_BAD_BUFFER_SIZE;
+*NumBytes = NumOfBytesRead;
+return EFI_BAD_BUFFER_SIZE;
 }
 
 /**
@@ -505,27 +511,20 @@ ProduceFVBProtocolOnBuffer (
   // Init the block caching fields of the device
   // First, count the number of blocks
   //
-#ifdef checkedc
   _Bundled {
 	FvbDev->NumBlocks = 0;
 	FvbDev->LbaCache = NULL;
   }
-#else
-  FvbDev->NumBlocks = 0;
-#endif
+
   
   for (PtrBlockMapEntry = FwVolHeader->BlockMap;
        PtrBlockMapEntry->NumBlocks != 0;
        PtrBlockMapEntry++)
   {
-#ifdef checkedc
 	_Bundled {
 	  FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
 	  FvbDev->LbaCache = NULL;
 	}
-#else
-	FvbDev->NumBlocks += PtrBlockMapEntry->NumBlocks;
-#endif
   }
 
   //
@@ -536,11 +535,7 @@ ProduceFVBProtocolOnBuffer (
     return EFI_OUT_OF_RESOURCES;
   }
  
-#ifdef checkedc
   FvbDev->LbaCache = _Assume_bounds_cast<_Array_ptr<LBA_CACHE>>(AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE)),  count(FvbDev->NumBlocks));
-#else
-  FvbDev->LbaCache = AllocatePool(FvbDev->NumBlocks * sizeof (LBA_CACHE));
-#endif
 
   if (FvbDev->LbaCache == NULL) {
     CoreFreePool (FvbDev);

@@ -36,11 +36,7 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL              *DevicePath;
   EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL    FwVolBlockInstance;
   UINTN                                 NumBlocks;
-#ifdef checkedc 
   _Array_ptr<LBA_CACHE>  		LbaCache : count(NumBlocks);
-#else
-  LBA_CACHE*                            LbaCache;
-#endif
   UINT32                                FvbAttributes;
   EFI_PHYSICAL_ADDRESS                  BaseAddress;
   UINT32                                AuthenticationStatus;
@@ -136,14 +132,14 @@ FwVolBlockEraseBlock (
 
 **/
 EFI_STATUS
-EFIAPI
+        EFIAPI
 FwVolBlockReadBlock (
-  IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
-  IN CONST  EFI_LBA                             Lba,
-  IN CONST  UINTN                               Offset,
-  IN OUT    UINTN                               *NumBytes,
-  IN OUT    UINT8                               *Buffer
-  );
+    IN CONST  EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *This,
+    IN CONST  EFI_LBA                             Lba,
+    IN CONST  UINTN                               Offset,
+    IN OUT    UINTN                               *NumBytes : itype(_Ptr<UINTN>),
+    IN OUT    UINT8                               *Buffer : itype(_Array_ptr<UINT8>) byte_count(*NumBytes)
+);
 
 /**
   Writes the specified number of bytes from the input buffer to the block.

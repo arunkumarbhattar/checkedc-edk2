@@ -34,7 +34,7 @@ VOID *
 EFIAPI
 CopyMem (
   OUT VOID       *DestinationBuffer,
-  IN CONST VOID  *SourceBuffer,
+  IN CONST VOID  *SourceBuffer : itype(_Array_ptr<const void>),
   IN UINTN       Length
   );
 
