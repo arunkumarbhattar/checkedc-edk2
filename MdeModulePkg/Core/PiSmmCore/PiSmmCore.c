@@ -666,8 +666,8 @@ SmmEntryPoint (
   BOOLEAN                     InLegacyBoot;
   BOOLEAN                     IsOverlapped;
   BOOLEAN                     IsOverUnderflow;
-  VOID                        *CommunicationBuffer;
   UINTN                       BufferSize;
+  _Array_ptr<VOID>            CommunicationBuffer : byte_count(BufferSize) = NULL;
 
   //
   // Update SMST with contents of the SmmEntryContext structure
@@ -702,8 +702,10 @@ SmmEntryPoint (
     // Check to see if this is a Synchronous SMI sent through the SMM Communication
     // Protocol or an Asynchronous SMI
     //
-    CommunicationBuffer = gSmmCorePrivate->CommunicationBuffer;
-    BufferSize          = gSmmCorePrivate->BufferSize;
+    _Bundled{
+        BufferSize          = gSmmCorePrivate->BufferSize;
+        CommunicationBuffer = gSmmCorePrivate->CommunicationBuffer;
+    }
     if (CommunicationBuffer != NULL) {
       //
       // Synchronous SMI for SMM Core or request from Communicate protocol

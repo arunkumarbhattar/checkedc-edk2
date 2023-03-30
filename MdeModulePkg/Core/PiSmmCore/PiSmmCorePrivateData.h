@@ -61,7 +61,7 @@ typedef struct {
   /// A table of SMRAM ranges passed from the SMM IPL to the SMM Core.  The SMM
   /// Core uses these ranges of SMRAM to initialize the SMM Core memory manager.
   ///
-  EFI_SMRAM_DESCRIPTOR    *SmramRanges;
+  _Array_ptr<EFI_SMRAM_DESCRIPTOR>    SmramRanges : count(SmramRangeCount);
 
   ///
   /// The SMM Foundation Entry Point.  The SMM Core fills in this field when the
@@ -96,7 +96,7 @@ typedef struct {
   /// a software SMI handler and for the software SMI handler to pass a buffer back to
   /// the caller of the SMM Communication Protocol.
   ///
-  VOID                     *CommunicationBuffer;
+  _Array_ptr<VOID>                     CommunicationBuffer : byte_count(BufferSize);
 
   ///
   /// This field is used by the SMM Communication Protocol to pass the size of a buffer,

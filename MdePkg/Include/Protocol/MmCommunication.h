@@ -69,7 +69,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_MM_COMMUNICATE)(
   IN CONST EFI_MM_COMMUNICATION_PROTOCOL   *This,
-  IN OUT VOID                              *CommBuffer,
+  IN OUT VOID                              *CommBuffer : itype(_Array_ptr<VOID>) byte_count(*CommSize),
   IN OUT UINTN                             *CommSize OPTIONAL
   );
 

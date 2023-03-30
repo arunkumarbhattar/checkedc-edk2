@@ -109,7 +109,7 @@ EFI_STATUS
 EFIAPI
 SmmCommunicationCommunicate (
   IN CONST EFI_SMM_COMMUNICATION_PROTOCOL  *This,
-  IN OUT VOID                              *CommBuffer,
+  IN OUT VOID*                              CommBuffer : itype(_Array_ptr<VOID>) byte_count(*CommSize),
   IN OUT UINTN                             *CommSize OPTIONAL
   );
 
@@ -141,8 +141,8 @@ EFI_STATUS
 EFIAPI
 SmmCommunicationMmCommunicate2 (
   IN CONST EFI_MM_COMMUNICATION2_PROTOCOL  *This,
-  IN OUT VOID                              *CommBufferPhysical,
-  IN OUT VOID                              *CommBufferVirtual,
+  IN OUT VOID                              *CommBufferPhysical : itype(_Array_ptr<VOID>) byte_count(*CommSize),
+  IN OUT VOID*                              CommBufferVirtual : itype(_Array_ptr<VOID>) byte_count(*CommSize),
   IN OUT UINTN                             *CommSize OPTIONAL
   );
 
@@ -303,7 +303,7 @@ SMM_CORE_PRIVATE_DATA  *gSmmCorePrivate = &mSmmCorePrivateData;
 //
 EFI_SMM_CONTROL2_PROTOCOL  *mSmmControl2;
 EFI_SMM_ACCESS2_PROTOCOL   *mSmmAccess;
-EFI_SMRAM_DESCRIPTOR       *mCurrentSmramRange;
+_Array_ptr<EFI_SMRAM_DESCRIPTOR>       mCurrentSmramRange : count(mSmmCorePrivateData.SmramRangeCount);
 BOOLEAN                    mSmmLocked = FALSE;
 BOOLEAN                    mEndOfDxe  = FALSE;
 EFI_PHYSICAL_ADDRESS       mSmramCacheBase;
@@ -387,36 +387,36 @@ SMM_IPL_EVENT_NOTIFICATION  mSmmIplEvents[] = {
   @param   SmramCacheSize   The returned cache range size.
 
 **/
-VOID
+void
 GetSmramCacheRange (
-  IN  EFI_SMRAM_DESCRIPTOR  *SmramRange,
-  OUT EFI_PHYSICAL_ADDRESS  *SmramCacheBase,
-  OUT UINT64                *SmramCacheSize
-  )
+        IN  _Ptr<EFI_SMRAM_DESCRIPTOR> SmramRange,
+        OUT _Ptr<EFI_PHYSICAL_ADDRESS> SmramCacheBase,
+        OUT _Ptr<UINT64>               SmramCacheSize
+)
 {
-  UINTN                 Index;
-  EFI_PHYSICAL_ADDRESS  RangeCpuStart;
-  UINT64                RangePhysicalSize;
-  BOOLEAN               FoundAjacentRange;
+    UINTN                 Index;
+    EFI_PHYSICAL_ADDRESS  RangeCpuStart;
+    UINT64                RangePhysicalSize;
+    BOOLEAN               FoundAdjacentRange;
 
-  *SmramCacheBase = SmramRange->CpuStart;
-  *SmramCacheSize = SmramRange->PhysicalSize;
+    *SmramCacheBase = SmramRange->CpuStart;
+    *SmramCacheSize = SmramRange->PhysicalSize;
 
-  do {
-    FoundAjacentRange = FALSE;
-    for (Index = 0; Index < gSmmCorePrivate->SmramRangeCount; Index++) {
-      RangeCpuStart     = gSmmCorePrivate->SmramRanges[Index].CpuStart;
-      RangePhysicalSize = gSmmCorePrivate->SmramRanges[Index].PhysicalSize;
-      if ((RangeCpuStart < *SmramCacheBase) && (*SmramCacheBase == (RangeCpuStart + RangePhysicalSize))) {
-        *SmramCacheBase   = RangeCpuStart;
-        *SmramCacheSize  += RangePhysicalSize;
-        FoundAjacentRange = TRUE;
-      } else if (((*SmramCacheBase + *SmramCacheSize) == RangeCpuStart) && (RangePhysicalSize > 0)) {
-        *SmramCacheSize  += RangePhysicalSize;
-        FoundAjacentRange = TRUE;
-      }
-    }
-  } while (FoundAjacentRange);
+    do {
+        FoundAdjacentRange = FALSE;
+        for (Index = 0; Index < gSmmCorePrivate->SmramRangeCount; Index++) {
+            RangeCpuStart     = gSmmCorePrivate->SmramRanges[Index].CpuStart;
+            RangePhysicalSize = gSmmCorePrivate->SmramRanges[Index].PhysicalSize;
+            if ((RangeCpuStart < *SmramCacheBase) && (*SmramCacheBase == (RangeCpuStart + RangePhysicalSize))) {
+                *SmramCacheBase   = RangeCpuStart;
+                *SmramCacheSize  += RangePhysicalSize;
+                FoundAdjacentRange = TRUE;
+            } else if (((*SmramCacheBase + *SmramCacheSize) == RangeCpuStart) && (RangePhysicalSize > 0)) {
+                *SmramCacheSize  += RangePhysicalSize;
+                FoundAdjacentRange = TRUE;
+            }
+        }
+    } while (FoundAdjacentRange);
 }
 
 /**
@@ -507,12 +507,12 @@ EFI_STATUS
 EFIAPI
 SmmCommunicationCommunicate (
   IN CONST EFI_SMM_COMMUNICATION_PROTOCOL  *This,
-  IN OUT VOID                              *CommBuffer,
+  IN OUT VOID*                              CommBuffer : itype(_Array_ptr<VOID>) byte_count(*CommSize),
   IN OUT UINTN                             *CommSize OPTIONAL
   )
 {
   EFI_STATUS                  Status;
-  EFI_SMM_COMMUNICATE_HEADER  *CommunicateHeader;
+  _Ptr<EFI_SMM_COMMUNICATE_HEADER>  CommunicateHeader = NULL;
   BOOLEAN                     OldInSmm;
   UINTN                       TempCommSize;
 
@@ -523,7 +523,7 @@ SmmCommunicationCommunicate (
     return EFI_INVALID_PARAMETER;
   }
 
-  CommunicateHeader = (EFI_SMM_COMMUNICATE_HEADER *)CommBuffer;
+  CommunicateHeader = (_Ptr<EFI_SMM_COMMUNICATE_HEADER>)CommBuffer;
 
   if (CommSize == NULL) {
     TempCommSize = OFFSET_OF (EFI_SMM_COMMUNICATE_HEADER, Data) + CommunicateHeader->MessageLength;
@@ -559,7 +559,10 @@ SmmCommunicationCommunicate (
     // Return status from software SMI
     //
     if (CommSize != NULL) {
-      *CommSize = gSmmCorePrivate->BufferSize;
+      _Bundled{
+          *CommSize = gSmmCorePrivate->BufferSize;
+          CommBuffer = _Assume_bounds_cast<_Array_ptr<VOID>>(gSmmCorePrivate->CommunicationBuffer, byte_count(*CommSize));
+      }
     }
 
     return gSmmCorePrivate->ReturnStatus;
@@ -600,7 +603,10 @@ SmmCommunicationCommunicate (
                                            );
   TempCommSize += OFFSET_OF (EFI_SMM_COMMUNICATE_HEADER, Data);
   if (CommSize != NULL) {
+_Bundled{
     *CommSize = TempCommSize;
+    CommBuffer = _Assume_bounds_cast<_Array_ptr<VOID>>(CommBuffer, byte_count(TempCommSize));
+}
   }
 
   //
@@ -639,8 +645,8 @@ EFI_STATUS
 EFIAPI
 SmmCommunicationMmCommunicate2 (
   IN CONST EFI_MM_COMMUNICATION2_PROTOCOL  *This,
-  IN OUT VOID                              *CommBufferPhysical,
-  IN OUT VOID                              *CommBufferVirtual,
+  IN OUT VOID*                  CommBufferPhysical : itype(_Array_ptr<VOID>) byte_count(*CommSize),
+  IN OUT VOID*                  CommBufferVirtual : itype(_Array_ptr<VOID>) byte_count(*CommSize),
   IN OUT UINTN                             *CommSize OPTIONAL
   )
 {
@@ -1016,8 +1022,8 @@ GetPeCoffImageFixLoadingAssignedAddress (
 **/
 EFI_STATUS
 ExecuteSmmCoreFromSmram (
-  IN OUT EFI_SMRAM_DESCRIPTOR  *SmramRange,
-  IN OUT EFI_SMRAM_DESCRIPTOR  *SmramRangeSmmCore,
+  IN OUT _Ptr<EFI_SMRAM_DESCRIPTOR>  SmramRange,
+  IN OUT _Ptr<EFI_SMRAM_DESCRIPTOR>  SmramRangeSmmCore,
   IN     VOID                  *Context
   )
 {
@@ -1651,7 +1657,7 @@ SmmIplEntry (
   UINT64                           SmmCodeSize;
   EFI_CPU_ARCH_PROTOCOL            *CpuArch;
   EFI_STATUS                       SetAttrStatus;
-  EFI_SMRAM_DESCRIPTOR             *SmramRangeSmmDriver;
+  _Ptr<EFI_SMRAM_DESCRIPTOR>       SmramRangeSmmDriver = NULL;
   EFI_GCD_MEMORY_SPACE_DESCRIPTOR  MemDesc;
 
   //
@@ -1673,8 +1679,15 @@ SmmIplEntry (
   Status = gBS->LocateProtocol (&gEfiSmmControl2ProtocolGuid, NULL, (VOID **)&mSmmControl2);
   ASSERT_EFI_ERROR (Status);
 
-  gSmmCorePrivate->SmramRanges = GetFullSmramRanges (&gSmmCorePrivate->SmramRangeCount);
+  int tempRangeCount = gSmmCorePrivate->SmramRangeCount;
+  _Array_ptr<EFI_SMRAM_DESCRIPTOR> RetSmramRanges = GetFullSmramRanges(&tempRangeCount);
 
+  _Bundled{
+      gSmmCorePrivate->SmramRangeCount = tempRangeCount;
+      gSmmCorePrivate->
+      SmramRanges = _Assume_bounds_cast < _Array_ptr < EFI_SMRAM_DESCRIPTOR >> (
+        RetSmramRanges, count(gSmmCorePrivate->SmramRangeCount));
+}
   //
   // Open all SMRAM ranges
   //
