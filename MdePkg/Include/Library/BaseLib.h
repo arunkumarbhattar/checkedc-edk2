@@ -4394,7 +4394,7 @@ CalculateSum8 (
 UINT8
 EFIAPI
 CalculateCheckSum8 (
-  IN      CONST UINT8  *Buffer,
+  IN      CONST UINT8  *Buffer : itype(_Array_ptr<CONST UINT8>) byte_count(Length),
   IN      UINTN        Length
   );
 

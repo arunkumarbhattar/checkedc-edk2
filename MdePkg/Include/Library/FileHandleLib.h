@@ -95,7 +95,7 @@ EFIAPI
 FileHandleRead (
   IN EFI_FILE_HANDLE  FileHandle,
   IN OUT UINTN        *BufferSize,
-  OUT VOID            *Buffer
+  OUT _Array_ptr<VOID>  Buffer : byte_count(*BufferSize)
   );
 
 /**

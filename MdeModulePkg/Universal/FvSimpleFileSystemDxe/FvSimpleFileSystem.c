@@ -70,8 +70,8 @@ EFI_STATUS
 FvFsFindExecutableSection (
   IN     EFI_FIRMWARE_VOLUME2_PROTOCOL  *FvProtocol,
   IN     FV_FILESYSTEM_FILE_INFO        *FvFileInfo,
-  IN OUT UINTN                          *BufferSize,
-  IN OUT VOID                           **Buffer
+  IN OUT UINTN              		*BufferSize,
+  IN OUT _Array_ptr<VOID>               *Buffer : byte_count(*BufferSize)
   )
 {
   EFI_SECTION_TYPE  SectionType;
@@ -133,7 +133,7 @@ FvFsGetFileSize (
     //
     // Get the size of the first executable section out of the file.
     //
-    Status = FvFsFindExecutableSection (FvProtocol, FvFileInfo, (UINTN *)&FvFileInfo->FileInfo.FileSize, &IgnoredPtr);
+    Status = FvFsFindExecutableSection (FvProtocol, FvFileInfo, (UINTN *)&FvFileInfo->FileInfo.FileSize, (_Array_ptr<VOID>*)&IgnoredPtr);
     if (Status == EFI_WARN_BUFFER_TOO_SMALL) {
       return EFI_SUCCESS;
     }
@@ -146,7 +146,7 @@ FvFsGetFileSize (
                            &FvFileInfo->NameGuid,
                            EFI_SECTION_RAW,
                            0,
-                           &IgnoredPtr,
+                           (_Array_ptr<VOID>*)&IgnoredPtr,
                            (UINTN *)&FvFileInfo->FileInfo.FileSize,
                            &AuthenticationStatus
                            );
@@ -215,7 +215,7 @@ FvFsReadFile (
   IN     EFI_FIRMWARE_VOLUME2_PROTOCOL  *FvProtocol,
   IN     FV_FILESYSTEM_FILE_INFO        *FvFileInfo,
   IN OUT UINTN                          *BufferSize,
-  IN OUT VOID                           **Buffer
+  IN OUT _Array_ptr<VOID>               *Buffer : byte_count(*BufferSize)
   )
 {
   UINT32                  AuthenticationStatus;
@@ -652,16 +652,15 @@ EFIAPI
 FvSimpleFileSystemRead (
   IN     EFI_FILE_PROTOCOL  *This,
   IN OUT UINTN              *BufferSize,
-  OUT VOID                  *Buffer
+  OUT _Array_ptr<VOID>      *Buffer : byte_count(*BufferSize)
   )
 {
   FV_FILESYSTEM_INSTANCE  *Instance;
   FV_FILESYSTEM_FILE      *File;
   EFI_STATUS              Status;
   LIST_ENTRY              *FvFileInfoLink;
-  VOID                    *FileBuffer;
   UINTN                   FileSize;
-
+  EFI_FILE_INFO *         FileBuffer;
   File     = FVFS_FILE_FROM_FILE_THIS (This);
   Instance = File->Instance;
 
@@ -670,7 +669,7 @@ FvSimpleFileSystemRead (
       //
       // Directory read: populate Buffer with an EFI_FILE_INFO
       //
-      Status = FvFsGetFileInfo (File->DirReadNext, BufferSize, Buffer);
+      Status = FvFsGetFileInfo (File->DirReadNext, BufferSize, (EFI_FILE_INFO *)Buffer);
       if (!EFI_ERROR (Status)) {
         //
         // Successfully read a directory entry, now update the pointer to the
@@ -693,25 +692,30 @@ FvSimpleFileSystemRead (
       // Directory read. All entries have been read, so return a zero-size
       // buffer.
       //
-      *BufferSize = 0;
+      _Bundled {
+        *BufferSize = 0;
+        Buffer = NULL;
+      }
       return EFI_SUCCESS;
     }
   } else {
     FileSize = (UINTN)File->FvFileInfo->FileInfo.FileSize;
 
-    FileBuffer = AllocateZeroPool (FileSize);
     if (FileBuffer == NULL) {
       return EFI_DEVICE_ERROR;
     }
 
-    Status = FvFsReadFile (File->Instance->FvProtocol, File->FvFileInfo, &FileSize, &FileBuffer);
+    Status = FvFsReadFile (File->Instance->FvProtocol, File->FvFileInfo, &FileSize, (_Array_ptr<VOID>)&FileBuffer);
     if (EFI_ERROR (Status)) {
       FreePool (FileBuffer);
       return EFI_DEVICE_ERROR;
     }
 
     if (*BufferSize + File->Position > FileSize) {
-      *BufferSize = (UINTN)(FileSize - File->Position);
+      _Bundled{
+            *BufferSize = (UINTN)(FileSize - File->Position);
+            Buffer = _Assume_bounds_cast<_Array_ptr<VOID>>(FileBuffer, byte_count(*BufferSize));
+      }
     }
 
     CopyMem (Buffer, (UINT8 *)FileBuffer + File->Position, *BufferSize);

@@ -326,7 +326,7 @@ VOID *
 EFIAPI
 AllocateCopyPool (
   IN UINTN       AllocationSize,
-  IN CONST VOID  *Buffer
+  IN CONST VOID  *Buffer : itype(_Array_ptr<CONST VOID>) byte_count(AllocationSize)
   );
 
 /**

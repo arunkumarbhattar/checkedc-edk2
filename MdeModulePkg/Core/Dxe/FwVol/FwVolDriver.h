@@ -17,7 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 typedef struct {
   LIST_ENTRY             Link;
-  EFI_FFS_FILE_HEADER    *FfsHeader;
+  _Ptr<EFI_FFS_FILE_HEADER> FfsHeader;
   UINTN                  StreamHandle;
   BOOLEAN                FileCached;
 } FFS_FILE_LIST_ENTRY;
@@ -178,14 +178,14 @@ FvGetNextFile (
 EFI_STATUS
 EFIAPI
 FvReadFile (
-  IN CONST EFI_FIRMWARE_VOLUME2_PROTOCOL  *This,
-  IN CONST EFI_GUID                       *NameGuid,
-  IN OUT   VOID                           **Buffer,
-  IN OUT   UINTN                          *BufferSize,
-  OUT      EFI_FV_FILETYPE                *FoundType,
-  OUT      EFI_FV_FILE_ATTRIBUTES         *FileAttributes,
-  OUT      UINT32                         *AuthenticationStatus
-  );
+        IN CONST EFI_FIRMWARE_VOLUME2_PROTOCOL  *This,
+        IN CONST EFI_GUID                       *NameGuid,
+        IN OUT   _Array_ptr<VOID>               *Buffer : count(*BufferSize),
+        IN OUT   UINTN                          *BufferSize,
+        OUT      EFI_FV_FILETYPE                *FoundType,
+        OUT      EFI_FV_FILE_ATTRIBUTES         *FileAttributes,
+        OUT      UINT32                         *AuthenticationStatus
+);
 
 /**
   Locates a section in a given FFS File and
@@ -315,7 +315,7 @@ FvSetVolumeInfo (
 BOOLEAN
 IsBufferErased (
   IN UINT8  ErasePolarity,
-  IN VOID   *InBuffer,
+  IN _Array_ptr<VOID> InBuffer : byte_count(BufferSize),
   IN UINTN  BufferSize
   );
 
@@ -331,7 +331,7 @@ IsBufferErased (
 EFI_FFS_FILE_STATE
 GetFileState (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader
+  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
   );
 
 /**
@@ -363,7 +363,7 @@ SetFileState (
 BOOLEAN
 IsValidFfsHeader (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader,
+  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader,
   OUT EFI_FFS_FILE_STATE  *FileState
   );
 
@@ -381,7 +381,7 @@ IsValidFfsHeader (
 BOOLEAN
 IsValidFfsFile (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader
+  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader
   );
 
 #endif

@@ -114,7 +114,7 @@ InternalGetSectionFromFv (
   IN  CONST EFI_GUID    *NameGuid,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : count(*Size),
   OUT UINTN             *Size
   )
 {
@@ -232,7 +232,7 @@ GetSectionFromAnyFvByFileType  (
   IN  UINTN             FileInstance,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   )
 {
@@ -375,7 +375,7 @@ GetSectionFromAnyFv  (
   IN CONST  EFI_GUID          *NameGuid,
   IN        EFI_SECTION_TYPE  SectionType,
   IN        UINTN             SectionInstance,
-  OUT       VOID              **Buffer,
+  OUT       _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT       UINTN             *Size
   )
 {
@@ -500,7 +500,7 @@ GetSectionFromFv (
   IN  CONST EFI_GUID    *NameGuid,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   )
 {
@@ -561,7 +561,7 @@ EFIAPI
 GetSectionFromFfs (
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   )
 {
@@ -683,7 +683,7 @@ GetFileBufferByFilePath (
                                FvNameGuid,
                                SectionType,
                                0,
-                               (VOID **)&ImageBuffer,
+                               (_Array_ptr<void> *)&ImageBuffer,
                                &ImageBufferSize,
                                AuthenticationStatus
                                );
@@ -700,7 +700,7 @@ GetFileBufferByFilePath (
           Status      = FwVol->ReadFile (
                                  FwVol,
                                  FvNameGuid,
-                                 (VOID **)&ImageBuffer,
+                                 (_Array_ptr<VOID>*)&ImageBuffer,
                                  &ImageBufferSize,
                                  &Type,
                                  &Attrib,
@@ -817,7 +817,10 @@ GetFileBufferByFilePath (
                 // Read the file into the buffer we allocated
                 //
                 ImageBufferSize = (UINTN)FileInfo->FileSize;
-                Status          = FileHandle->Read (FileHandle, &ImageBufferSize, ImageBuffer);
+                Status          = FileHandle->Read (FileHandle, &ImageBufferSize, 
+				_Assume_bounds_cast<_Array_ptr<void>>(ImageBuffer, bounds(
+						ImageBuffer, 
+						ImageBuffer + *&ImageBufferSize)));
               }
             }
           }
@@ -1017,7 +1020,7 @@ GetFileDevicePathFromAnyFv (
                NameGuid,
                SectionType,
                SectionInstance,
-               &Buffer,
+               (_Array_ptr<void> *)&Buffer,
                &Size
                );
   if (!EFI_ERROR (Status)) {
@@ -1045,7 +1048,7 @@ GetFileDevicePathFromAnyFv (
                  NameGuid,
                  SectionType,
                  SectionInstance,
-                 &Buffer,
+                 (_Array_ptr<void> *)&Buffer,
                  &Size
                  );
 

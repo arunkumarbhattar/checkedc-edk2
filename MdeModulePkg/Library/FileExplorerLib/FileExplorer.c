@@ -1165,7 +1165,8 @@ LibFindFiles (
     FileHandle->SetPosition (FileHandle, 0);
     for ( ; ;) {
       BufferSize = DirBufferSize;
-      Status     = FileHandle->Read (FileHandle, &BufferSize, DirInfo);
+      Status     = FileHandle->Read (FileHandle, &BufferSize, 
+		      _Assume_bounds_cast<_Array_ptr<void>>(DirInfo, byte_count(*&BufferSize)));
       if (EFI_ERROR (Status) || (BufferSize == 0)) {
         Status = EFI_SUCCESS;
         break;

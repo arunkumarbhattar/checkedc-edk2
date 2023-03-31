@@ -294,7 +294,7 @@ EFI_STATUS
 (EFIAPI *EFI_FV_READ_FILE)(
   IN CONST  EFI_FIRMWARE_VOLUME2_PROTOCOL *This,
   IN CONST  EFI_GUID                      *NameGuid,
-  IN OUT    VOID                          **Buffer,
+  IN OUT    _Array_ptr<VOID>              *Buffer : count(*BufferSize),
   IN OUT    UINTN                         *BufferSize,
   OUT       EFI_FV_FILETYPE               *FoundType,
   OUT       EFI_FV_FILE_ATTRIBUTES        *FileAttributes,
@@ -402,7 +402,7 @@ EFI_STATUS
   IN CONST  EFI_GUID                      *NameGuid,
   IN        EFI_SECTION_TYPE              SectionType,
   IN        UINTN                         SectionInstance,
-  IN OUT    VOID                          **Buffer,
+  IN OUT    _Array_ptr<VOID>              *Buffer : count(*BufferSize),
   IN OUT    UINTN                         *BufferSize,
   OUT       UINT32                        *AuthenticationStatus
   );

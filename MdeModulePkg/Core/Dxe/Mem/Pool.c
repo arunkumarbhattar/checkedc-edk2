@@ -578,7 +578,7 @@ CoreInternalFreePool (
 EFI_STATUS
 EFIAPI
 CoreFreePool (
-  IN VOID  *Buffer
+  IN VOID  *Buffer : itype(_Ptr<void>)
   )
 {
   EFI_STATUS       Status;

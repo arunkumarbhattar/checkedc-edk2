@@ -282,7 +282,7 @@ GetImageName (
                         &FvFilePath->FvFileName,
                         EFI_SECTION_USER_INTERFACE,
                         0,
-                        &Buffer,
+                        (_Array_ptr<VOID>*)&Buffer,
                         &BufferSize,
                         &AuthenticationStatus
                         );

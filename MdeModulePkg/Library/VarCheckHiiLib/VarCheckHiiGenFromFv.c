@@ -197,7 +197,7 @@ ParseFfs (
                   DriverGuid,
                   EFI_SECTION_RAW,
                   0, // Instance
-                  &Buffer,
+                  (_Array_ptr<void>*)&Buffer,
                   &Size,
                   &AuthenticationStatus
                   );
@@ -210,7 +210,7 @@ ParseFfs (
                              DriverGuid,
                              EFI_SECTION_PE32,
                              0, // Instance
-                             &SectionBuffer,
+                             (_Array_ptr<void>*)&SectionBuffer,
                              &SectionSize,
                              &AuthenticationStatus
                              );

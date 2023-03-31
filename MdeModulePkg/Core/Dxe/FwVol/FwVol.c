@@ -325,7 +325,7 @@ FvCheck (
   EFI_FVB_ATTRIBUTES_2                FvbAttributes;
   EFI_FV_BLOCK_MAP_ENTRY              *BlockMap;
   FFS_FILE_LIST_ENTRY                 *FfsFileEntry;
-  EFI_FFS_FILE_HEADER                 *FfsHeader;
+  _Ptr<EFI_FFS_FILE_HEADER>           FfsHeader = NULL;
   UINT8                               *CacheLocation;
   UINTN                               Index;
   EFI_LBA                             LbaIndex;
@@ -336,7 +336,7 @@ FvCheck (
   EFI_PHYSICAL_ADDRESS                PhysicalAddress;
   BOOLEAN                             FileCached;
   UINTN                               WholeFileSize;
-  EFI_FFS_FILE_HEADER                 *CacheFfsHeader;
+  _Ptr<EFI_FFS_FILE_HEADER>           CacheFfsHeader = NULL;
 
   FileCached     = FALSE;
   CacheFfsHeader = NULL;
@@ -436,12 +436,17 @@ FvCheck (
     // Searching for files starts on an 8 byte aligned boundary after the end of the Extended Header if it exists.
     //
     FwVolExtHeader = (EFI_FIRMWARE_VOLUME_EXT_HEADER *)(FvDevice->CachedFv + FwVolHeader->ExtHeaderOffset);
-    FfsHeader      = (EFI_FFS_FILE_HEADER *)((UINT8 *)FwVolExtHeader + FwVolExtHeader->ExtHeaderSize);
+    FfsHeader      = (_Ptr<EFI_FFS_FILE_HEADER>)(
+            _Assume_bounds_cast<_Array_ptr<VOID>>(FwVolExtHeader + FwVolExtHeader->ExtHeaderSize,
+                    bounds(FwVolExtHeader , FwVolExtHeader + FwVolExtHeader->ExtHeaderSize)));
   } else {
-    FfsHeader = (EFI_FFS_FILE_HEADER *)(FvDevice->CachedFv + FwVolHeader->HeaderLength);
+    FfsHeader = (_Ptr<EFI_FFS_FILE_HEADER>)(_Assume_bounds_cast<_Array_ptr<VOID>>(FvDevice->CachedFv + FwVolHeader->HeaderLength,
+            bounds(FvDevice->CachedFv , FvDevice->CachedFv + FwVolHeader->HeaderLength)));
   }
 
-  FfsHeader    = (EFI_FFS_FILE_HEADER *)ALIGN_POINTER (FfsHeader, 8);
+  FfsHeader    = (_Ptr<EFI_FFS_FILE_HEADER> )
+          _Assume_bounds_cast<_Array_ptr<EFI_FFS_FILE_HEADER>>(ALIGN_POINTER ((VOID*)FfsHeader, 8)
+          , count(1));
   TopFvAddress = FvDevice->EndOfCachedFv;
   while (((UINTN)FfsHeader >= (UINTN)FvDevice->CachedFv) && ((UINTN)FfsHeader <= (UINTN)((UINTN)TopFvAddress - sizeof (EFI_FFS_FILE_HEADER)))) {
     if (FileCached) {
@@ -454,7 +459,10 @@ FvCheck (
       TestLength = sizeof (EFI_FFS_FILE_HEADER);
     }
 
-    if (IsBufferErased (FvDevice->ErasePolarity, FfsHeader, TestLength)) {
+    if (IsBufferErased (FvDevice->ErasePolarity,
+                        _Assume_bounds_cast<_Array_ptr<VOID>>(FfsHeader,
+                                bounds((_Array_ptr<EFI_FFS_FILE_HEADER>)FfsHeader,
+                                       (_Array_ptr<EFI_FFS_FILE_HEADER>)FfsHeader + 1)), TestLength)) {
       //
       // We have found the free space so we are done!
       //
@@ -494,7 +502,8 @@ FvCheck (
         // And then, the cached file buffer can be also used for FvReadFile.
         //
         WholeFileSize  = IS_FFS_FILE2 (CacheFfsHeader) ? FFS_FILE2_SIZE (CacheFfsHeader) : FFS_FILE_SIZE (CacheFfsHeader);
-        CacheFfsHeader = AllocateCopyPool (WholeFileSize, CacheFfsHeader);
+        CacheFfsHeader = (_Ptr<EFI_FFS_FILE_HEADER>)_Assume_bounds_cast<_Array_ptr<EFI_FFS_FILE_HEADER>>(
+                AllocateCopyPool (WholeFileSize, (void*)CacheFfsHeader), count(1));
         if (CacheFfsHeader == NULL) {
           Status = EFI_OUT_OF_RESOURCES;
           goto Done;

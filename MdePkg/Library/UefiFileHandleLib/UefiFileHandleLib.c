@@ -168,7 +168,7 @@ EFIAPI
 FileHandleRead (
   IN EFI_FILE_HANDLE  FileHandle,
   IN OUT UINTN        *BufferSize,
-  OUT VOID            *Buffer
+  OUT _Array_ptr<VOID> Buffer : byte_count(*BufferSize)
   )
 {
   if (FileHandle == NULL) {
@@ -505,7 +505,8 @@ FileHandleFindFirstFile (
   //
   // read in the info about the first file
   //
-  Status = FileHandleRead (DirHandle, &BufferSize, *Buffer);
+  Status = FileHandleRead (DirHandle, &BufferSize, 
+		  _Assume_bounds_cast<_Array_ptr<void>>(*Buffer, byte_count(BufferSize)));
   ASSERT (Status != EFI_BUFFER_TOO_SMALL);
   if (EFI_ERROR (Status) || (BufferSize == 0)) {
     FreePool (*Buffer);
@@ -561,7 +562,8 @@ FileHandleFindNextFile (
   //
   // read in the info about the next file
   //
-  Status = FileHandleRead (DirHandle, &BufferSize, Buffer);
+  Status = FileHandleRead (DirHandle, &BufferSize, 
+		  _Assume_bounds_cast<_Array_ptr<void>>(Buffer, byte_count(BufferSize)));
   ASSERT (Status != EFI_BUFFER_TOO_SMALL);
   if (EFI_ERROR (Status)) {
     return (Status);

@@ -973,7 +973,9 @@ GetFileImageInAlphabetFromDir (
     Status = FileHandle->Read (
                            FileHandle,
                            &Size,
-                           TempFilePtrBuf[FileCount].ImageAddress
+                           _Assume_bounds_cast<_Array_ptr<void>>(
+				   TempFilePtrBuf[FileCount].ImageAddress,
+				   byte_count(*&Size))
                            );
 
     FileHandle->Close (FileHandle);

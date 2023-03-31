@@ -864,8 +864,8 @@ STATIC_ASSERT (sizeof (__VERIFY_INT32_ENUM_SIZE) == 4, "Size of enum does not me
   @return  Pointer to the aligned address.
 
 **/
-#define ALIGN_POINTER(Pointer, Alignment)  ((VOID *) (ALIGN_VALUE ((UINTN)(Pointer), (Alignment))))
-
+#define C_ALIGN_POINTER(Pointer, Alignment)  ((_Ptr<VOID>) (ALIGN_VALUE ((UINTN)(Pointer), (Alignment))))
+#define ALIGN_POINTER(Pointer, Alignment)  ((VOID*) (ALIGN_VALUE ((UINTN)(Pointer), (Alignment))))
 /**
   Rounds a value up to the next natural boundary for the current CPU.
   This is 4-bytes for 32-bit CPUs and 8-bytes for 64-bit CPUs.

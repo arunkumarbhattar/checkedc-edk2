@@ -200,7 +200,7 @@ AcpiPlatformEntryPoint (
                       (EFI_GUID *)PcdGetPtr (PcdAcpiTableStorageFile),
                       EFI_SECTION_RAW,
                       Instance,
-                      (VOID **)&CurrentTable,
+                      (_Array_ptr<VOID>*)&CurrentTable,
                       &Size,
                       &FvStatus
                       );

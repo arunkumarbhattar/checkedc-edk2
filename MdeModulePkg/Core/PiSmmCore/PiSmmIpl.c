@@ -1042,7 +1042,7 @@ ExecuteSmmCoreFromSmram (
              0,
              EFI_SECTION_PE32,
              0,
-             &SourceBuffer,
+             (_Array_ptr<VOID>*)&SourceBuffer,
              &SourceSize
              );
   if (EFI_ERROR (Status)) {

@@ -2527,7 +2527,7 @@ BmRegisterBootManagerMenu (
                PcdGetPtr (PcdBootManagerMenuFile),
                EFI_SECTION_USER_INTERFACE,
                0,
-               (VOID **)&Description,
+               (_Array_ptr<VOID> *)&Description,
                &DescriptionLength
                );
     if (EFI_ERROR (Status)) {

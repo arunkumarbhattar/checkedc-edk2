@@ -435,7 +435,7 @@ LocateVarCheckPcdBin (
   Status = GetSectionFromFfs (
              EFI_SECTION_RAW,
              0,
-             (VOID **)&VarCheckPcdBin,
+             (_Array_ptr<VOID>*)&VarCheckPcdBin,
              &VarCheckPcdBinSize
              );
   if (!EFI_ERROR (Status)) {

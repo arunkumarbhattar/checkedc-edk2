@@ -57,7 +57,7 @@ GetSectionFromAnyFvByFileType  (
   IN  UINTN             FileInstance,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   );
 
@@ -110,7 +110,7 @@ GetSectionFromAnyFv  (
   IN  CONST EFI_GUID    *NameGuid,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   );
 
@@ -165,7 +165,7 @@ GetSectionFromFv (
   IN  CONST EFI_GUID    *NameGuid,
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer : byte_count(*Size),
   OUT UINTN             *Size
   );
 
@@ -216,7 +216,7 @@ EFIAPI
 GetSectionFromFfs (
   IN  EFI_SECTION_TYPE  SectionType,
   IN  UINTN             SectionInstance,
-  OUT VOID              **Buffer,
+  OUT _Array_ptr<VOID>  *Buffer  : byte_count(*Size),
   OUT UINTN             *Size
   );
 

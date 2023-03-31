@@ -408,7 +408,7 @@ GetModuleInfoFromHandle (
                    TempGuid,
                    EFI_SECTION_USER_INTERFACE,
                    0,
-                   (VOID **)&StringPtr,
+                   (_Array_ptr<VOID> *)&StringPtr,
                    &StringSize
                    );
 

@@ -268,7 +268,7 @@ EFIAPI
 FvReadFile (
   IN CONST EFI_FIRMWARE_VOLUME2_PROTOCOL  *This,
   IN CONST EFI_GUID                       *NameGuid,
-  IN OUT   VOID                           **Buffer,
+  IN OUT   _Array_ptr<VOID>               *Buffer : count(*BufferSize),
   IN OUT   UINTN                          *BufferSize,
   OUT      EFI_FV_FILETYPE                *FoundType,
   OUT      EFI_FV_FILE_ATTRIBUTES         *FileAttributes,
@@ -281,8 +281,8 @@ FvReadFile (
   EFI_FV_FILETYPE         LocalFoundType;
   EFI_FV_FILE_ATTRIBUTES  LocalAttributes;
   UINTN                   FileSize;
-  UINT8                   *SrcPtr;
-  EFI_FFS_FILE_HEADER     *FfsHeader;
+  _Array_ptr<UINT8>       SrcPtr : count(FileSize) = NULL;
+  _Ptr<EFI_FFS_FILE_HEADER>     FfsHeader = NULL;
   UINTN                   InputBufferSize;
   UINTN                   WholeFileSize;
 

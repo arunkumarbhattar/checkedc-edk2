@@ -21,7 +21,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_FFS_FILE_STATE
 GetFileState (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader
+  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
   )
 {
   EFI_FFS_FILE_STATE  FileState;
@@ -55,13 +55,13 @@ GetFileState (
 BOOLEAN
 IsBufferErased (
   IN UINT8  ErasePolarity,
-  IN VOID   *InBuffer,
+  IN _Array_ptr<VOID> InBuffer : byte_count(BufferSize),
   IN UINTN  BufferSize
   )
 {
   UINTN  Count;
   UINT8  EraseByte;
-  UINT8  *Buffer;
+  _Array_ptr<UINT8>  Buffer : count(BufferSize) = NULL;
 
   if (ErasePolarity == 1) {
     EraseByte = 0xFF;
@@ -115,7 +115,7 @@ VerifyFvHeaderChecksum (
 **/
 BOOLEAN
 VerifyHeaderChecksum (
-  IN EFI_FFS_FILE_HEADER  *FfsHeader
+  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
   )
 {
   UINT8  HeaderChecksum;
@@ -149,7 +149,7 @@ VerifyHeaderChecksum (
 BOOLEAN
 IsValidFfsHeader (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader,
+  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader,
   OUT EFI_FFS_FILE_STATE  *FileState
   )
 {
@@ -186,7 +186,7 @@ IsValidFfsHeader (
 BOOLEAN
 IsValidFfsFile (
   IN UINT8                ErasePolarity,
-  IN EFI_FFS_FILE_HEADER  *FfsHeader
+  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
   )
 {
   EFI_FFS_FILE_STATE  FileState;
