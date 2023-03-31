@@ -458,7 +458,7 @@ EFIAPI
 UdfRead (
   IN      EFI_FILE_PROTOCOL  *This,
   IN OUT  UINTN              *BufferSize,
-  OUT     VOID               *Buffer
+  OUT     _Array_ptr<VOID>   Buffer : byte_count(*BufferSize)
   );
 
 /**
