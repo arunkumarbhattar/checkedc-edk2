@@ -303,7 +303,7 @@ ReadyToLockEventNotify (
              &gEfiCallerIdGuid,
              EFI_SECTION_PE32,
              0,
-             (VOID **)&Buffer,
+             (_Array_ptr<VOID >*)&Buffer,
              &BufferSize
              );
   ASSERT_EFI_ERROR (Status);

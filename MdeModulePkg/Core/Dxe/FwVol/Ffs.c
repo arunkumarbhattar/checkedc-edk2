@@ -21,7 +21,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_FFS_FILE_STATE
 GetFileState (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
+  IN EFI_FFS_FILE_HEADER*  FfsHeader
   )
 {
   EFI_FFS_FILE_STATE  FileState;
@@ -115,7 +115,7 @@ VerifyFvHeaderChecksum (
 **/
 BOOLEAN
 VerifyHeaderChecksum (
-  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
+  IN EFI_FFS_FILE_HEADER*  FfsHeader
   )
 {
   UINT8  HeaderChecksum;
@@ -149,7 +149,7 @@ VerifyHeaderChecksum (
 BOOLEAN
 IsValidFfsHeader (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader,
+  IN EFI_FFS_FILE_HEADER* FfsHeader,
   OUT EFI_FFS_FILE_STATE  *FileState
   )
 {
@@ -186,7 +186,7 @@ IsValidFfsHeader (
 BOOLEAN
 IsValidFfsFile (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
+  IN EFI_FFS_FILE_HEADER*  FfsHeader
   )
 {
   EFI_FFS_FILE_STATE  FileState;

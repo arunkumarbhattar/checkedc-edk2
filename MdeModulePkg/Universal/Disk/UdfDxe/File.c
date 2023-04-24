@@ -317,7 +317,7 @@ EFIAPI
 UdfRead (
   IN      EFI_FILE_PROTOCOL  *This,
   IN OUT  UINTN              *BufferSize,
-  OUT     _Array_ptr<VOID>   Buffer : byte_count(*BufferSize)
+  OUT     _Array_ptr<VOID>   Buffer
   )
 {
   EFI_TPL                         OldTpl;
@@ -370,7 +370,10 @@ UdfRead (
     }
 
     if (PrivFileData->FilePosition == PrivFileData->FileSize) {
-      *BufferSize = 0;
+      _Bundled{
+	    *BufferSize = 0;
+      	    Buffer = NULL;
+      }
       Status      = EFI_SUCCESS;
       goto Done;
     }
@@ -388,11 +391,18 @@ UdfRead (
                &BufferSizeUint64
                );
     ASSERT (BufferSizeUint64 <= MAX_UINTN);
-    *BufferSize = (UINTN)BufferSizeUint64;
+    _Bundled{
+       *BufferSize = (UINTN)BufferSizeUint64;
+        Buffer = _Assume_bounds_cast<_Array_ptr<VOID>>(Buffer, byte_count(*BufferSize));
+      }
+
   } else if (IS_FID_DIRECTORY_FILE (Parent->FileIdentifierDesc)) {
     if ((ReadDirInfo->FidOffset == 0) && (PrivFileData->FilePosition > 0)) {
       Status      = EFI_DEVICE_ERROR;
-      *BufferSize = 0;
+      _Bundled{
+      	*BufferSize = 0;
+	Buffer = _Assume_bounds_cast<_Array_ptr<VOID>>(Buffer, byte_count(*BufferSize));
+      }
       goto Done;
     }
 
@@ -410,9 +420,13 @@ UdfRead (
         if (Status == EFI_DEVICE_ERROR) {
           FreePool (ReadDirInfo->DirectoryData);
           ZeroMem ((VOID *)ReadDirInfo, sizeof (UDF_READ_DIRECTORY_INFO));
+	
+         _Bundled{
+            *BufferSize = 0;
+            Buffer = _Assume_bounds_cast<_Array_ptr<VOID>>(Buffer, byte_count(*BufferSize));
+      	 }
 
-          *BufferSize = 0;
-          Status      = EFI_SUCCESS;
+	  Status      = EFI_SUCCESS;
         }
 
         goto Done;

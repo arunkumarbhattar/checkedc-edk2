@@ -108,7 +108,7 @@ LoadFileOnFv2LoadFile (
                                   &Private->NameGuid,
                                   EFI_SECTION_PE32,
                                   0,
-                                  &Pe32Buffer,
+                                  (_Array_ptr<void>*)&Pe32Buffer,
                                   &Pe32BufferSize,
                                   &AuthenticationStatus
                                   );
@@ -135,7 +135,7 @@ LoadFileOnFv2LoadFile (
                         &Private->NameGuid,
                         EFI_SECTION_PE32,
                         0,
-                        &Buffer,
+                        (_Array_ptr<void>*)&Buffer,
                         BufferSize,
                         &AuthenticationStatus
                         );
@@ -280,7 +280,7 @@ InstallFileLoadProtocol (
                    &NameGuid,
                    EFI_SECTION_USER_INTERFACE,
                    0,
-                   (VOID **)&UiName,
+                   (_Array_ptr<VOID> *)&UiName,
                    &UiNameSize,
                    &AuthenticationStatus
                    );

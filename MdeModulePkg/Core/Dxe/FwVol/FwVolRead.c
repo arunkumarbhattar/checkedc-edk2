@@ -282,7 +282,7 @@ FvReadFile (
   EFI_FV_FILE_ATTRIBUTES  LocalAttributes;
   UINTN                   FileSize;
   _Array_ptr<UINT8>       SrcPtr : count(FileSize) = NULL;
-  _Ptr<EFI_FFS_FILE_HEADER>     FfsHeader = NULL;
+  EFI_FFS_FILE_HEADER*     FfsHeader = NULL;
   UINTN                   InputBufferSize;
   UINTN                   WholeFileSize;
 
@@ -315,7 +315,7 @@ FvReadFile (
   //
   // Get a pointer to the header
   //
-  FfsHeader = FvDevice->LastKey->FfsHeader;
+  FfsHeader = (EFI_FFS_FILE_HEADER*)FvDevice->LastKey->FfsHeader;
   if (FvDevice->IsMemoryMapped) {
     //
     // Memory mapped FV has not been cached, so here is to cache by file.
@@ -369,9 +369,11 @@ FvReadFile (
   // Skip over file header
   //
   if (IS_FFS_FILE2 (FfsHeader)) {
-    SrcPtr = ((UINT8 *)FfsHeader) + sizeof (EFI_FFS_FILE_HEADER2);
+    SrcPtr = _Assume_bounds_cast<_Array_ptr<UINT8>>(((UINT8 *)FfsHeader) 
+		    + sizeof (EFI_FFS_FILE_HEADER2), count(FileSize));
   } else {
-    SrcPtr = ((UINT8 *)FfsHeader) + sizeof (EFI_FFS_FILE_HEADER);
+      SrcPtr = _Assume_bounds_cast<_Array_ptr<UINT8>>(((UINT8 *)FfsHeader)
+                    + sizeof (EFI_FFS_FILE_HEADER), count(FileSize));
   }
 
   Status = EFI_SUCCESS;
@@ -388,8 +390,11 @@ FvReadFile (
     // Callers buffer was not big enough
     //
     Status   = EFI_WARN_BUFFER_TOO_SMALL;
+    _Bundled{
     FileSize = InputBufferSize;
+    SrcPtr = _Assume_bounds_cast<_Array_ptr<UINT8>>(SrcPtr, count(FileSize));
   }
+   }
 
   //
   // Copy data into callers buffer
@@ -434,7 +439,7 @@ FvReadFileSection (
   IN CONST  EFI_GUID                       *NameGuid,
   IN        EFI_SECTION_TYPE               SectionType,
   IN        UINTN                          SectionInstance,
-  IN OUT    VOID                           **Buffer,
+  IN OUT    _Array_ptr<VOID> *Buffer : byte_count(*BufferSize),
   IN OUT    UINTN                          *BufferSize,
   OUT       UINT32                         *AuthenticationStatus
   )
@@ -510,7 +515,7 @@ FvReadFileSection (
              (SectionType == 0) ? NULL : &SectionType,
              NULL,
              (SectionType == 0) ? 0 : SectionInstance,
-             Buffer,
+             (void**)Buffer,
              BufferSize,
              AuthenticationStatus,
              FvDevice->IsFfs3Fv

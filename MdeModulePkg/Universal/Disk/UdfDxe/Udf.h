@@ -458,7 +458,7 @@ EFIAPI
 UdfRead (
   IN      EFI_FILE_PROTOCOL  *This,
   IN OUT  UINTN              *BufferSize,
-  OUT     _Array_ptr<VOID>   Buffer : byte_count(*BufferSize)
+  OUT     _Array_ptr<VOID>   Buffer
   );
 
 /**
@@ -891,7 +891,7 @@ SetFileInfo (
   IN      UINT64         FileSize,
   IN      CHAR16         *FileName,
   IN OUT  UINTN          *BufferSize,
-  OUT     VOID           *Buffer
+  OUT     VOID           * _Array Buffer
   );
 
 /**
@@ -983,7 +983,7 @@ ReadFileData (
   IN      UDF_FILE_INFO          *File,
   IN      UINT64                 FileSize,
   IN OUT  UINT64                 *FilePosition,
-  IN OUT  VOID                   *Buffer,
+  IN OUT  _Array_ptr<VOID>       Buffer,
   IN OUT  UINT64                 *BufferSize
   );
 

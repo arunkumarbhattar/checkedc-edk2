@@ -17,7 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 typedef struct {
   LIST_ENTRY             Link;
-  _Ptr<EFI_FFS_FILE_HEADER> FfsHeader;
+  EFI_FFS_FILE_HEADER* FfsHeader;
   UINTN                  StreamHandle;
   BOOLEAN                FileCached;
 } FFS_FILE_LIST_ENTRY;
@@ -222,7 +222,7 @@ FvReadFileSection (
   IN CONST  EFI_GUID                       *NameGuid,
   IN        EFI_SECTION_TYPE               SectionType,
   IN        UINTN                          SectionInstance,
-  IN OUT    VOID                           **Buffer,
+  IN OUT    _Array_ptr<VOID>                           *Buffer : byte_count(*BufferSize),
   IN OUT    UINTN                          *BufferSize,
   OUT       UINT32                         *AuthenticationStatus
   );
@@ -331,7 +331,7 @@ IsBufferErased (
 EFI_FFS_FILE_STATE
 GetFileState (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER>  FfsHeader
+  IN EFI_FFS_FILE_HEADER*  FfsHeader
   );
 
 /**
@@ -363,7 +363,7 @@ SetFileState (
 BOOLEAN
 IsValidFfsHeader (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader,
+  IN EFI_FFS_FILE_HEADER* FfsHeader,
   OUT EFI_FFS_FILE_STATE  *FileState
   );
 
@@ -381,7 +381,7 @@ IsValidFfsHeader (
 BOOLEAN
 IsValidFfsFile (
   IN UINT8                ErasePolarity,
-  IN _Ptr<EFI_FFS_FILE_HEADER> FfsHeader
+  IN EFI_FFS_FILE_HEADER* FfsHeader
   );
 
 #endif

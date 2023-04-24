@@ -652,7 +652,7 @@ EFIAPI
 FvSimpleFileSystemRead (
   IN     EFI_FILE_PROTOCOL  *This,
   IN OUT UINTN              *BufferSize,
-  OUT _Array_ptr<VOID>      *Buffer : byte_count(*BufferSize)
+  OUT _Array_ptr<VOID>      Buffer
   )
 {
   FV_FILESYSTEM_INSTANCE  *Instance;

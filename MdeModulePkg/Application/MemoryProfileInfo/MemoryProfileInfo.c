@@ -260,7 +260,7 @@ GetDriverNameString (
                    &DriverInfo->FileName,
                    EFI_SECTION_USER_INTERFACE,
                    0,
-                   (VOID **)&NameString,
+                   (_Array_ptr<VOID>*)&NameString,
                    &StringSize
                    );
     if (!EFI_ERROR (Status)) {

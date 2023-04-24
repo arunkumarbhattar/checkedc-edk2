@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="969d32e2-0a16-412d-89c4-f3a5f13e8ab8" name="Changes" comment="Partial Push [NOT COMPILING]" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2NhwN3N4sN4VCJnt08ifSRYNodl" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "last_opened_file_path": "/home/arun/Desktop/darpa_ex1/edk2-vulnerable/MdeModulePkg",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Core/Dxe/FwVolBlock" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="969d32e2-0a16-412d-89c4-f3a5f13e8ab8" name="Changes" comment="" />
+      <created>1680129578211</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1680129578211</updated>
+      <workItem from="1680129579212" duration="13026000" />
+      <workItem from="1680203805500" duration="1523000" />
+      <workItem from="1680222917920" duration="13097000" />
+      <workItem from="1680279512675" duration="607000" />
+      <workItem from="1680396431085" duration="33000" />
+      <workItem from="1680410998272" duration="885000" />
+    </task>
+    <task id="LOCAL-00001" summary="Adding more annotations to FwVolBlock.c">
+      <created>1680135613906</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1680135613906</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Adding more annotations to PiSMMCore Submodule">
+      <created>1680155109296</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1680155109296</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Partial Push [NOT COMPILING]">
+      <created>1680239633792</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1680239633792</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Partial Push [NOT COMPILING]">
+      <created>1680239644375</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1680239644375</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Adding more annotations to FwVolBlock.c" />
+    <MESSAGE value="Adding more annotations to PiSMMCore Submodule" />
+    <MESSAGE value="Partial Push [NOT COMPILING]" />
+    <option name="LAST_COMMIT_MESSAGE" value="Partial Push [NOT COMPILING]" />
+  </component>
+</project>

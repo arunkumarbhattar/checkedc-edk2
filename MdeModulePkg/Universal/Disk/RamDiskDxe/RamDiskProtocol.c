@@ -83,7 +83,7 @@ RamDiskPublishSsdt (
                &gEfiCallerIdGuid,
                EFI_SECTION_RAW,
                SectionInstance,
-               (VOID **)&Table,
+               (_Array_ptr<VOID>*)&Table,
                &TableSize
                );
     if (EFI_ERROR (Status)) {

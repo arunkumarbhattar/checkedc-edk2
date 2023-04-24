@@ -155,7 +155,7 @@ FvSimpleFileSystemOpenVolume (
                                 &NameGuid,
                                 EFI_SECTION_USER_INTERFACE,
                                 0,
-                                (VOID **)&UiSection,
+                                (_Array_ptr<VOID>*)&UiSection,
                                 &Size,
                                 &Authentication
                                 );

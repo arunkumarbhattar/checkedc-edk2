@@ -26,7 +26,7 @@ ReadFileFromVol (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *Vol,
   IN  CHAR16                           *FileName,
   OUT UINTN                            *BufferSize,
-  OUT VOID                             **Buffer
+  OUT _Array_ptr<VOID>                 * Buffer
   )
 {
   EFI_STATUS       Status;
@@ -35,7 +35,7 @@ ReadFileFromVol (
   UINTN            FileInfoSize;
   EFI_FILE_INFO    *FileInfo;
   UINTN            TempBufferSize;
-  VOID             *TempBuffer;
+  VOID* _Array     TempBuffer : byte_count(TempBufferSize) = NULL;
 
   //
   // Open the root directory
@@ -88,8 +88,14 @@ ReadFileFromVol (
   //
   // Allocate buffer for the file data. The last CHAR16 is for L'\0'
   //
-  TempBufferSize = (UINTN)FileInfo->FileSize + sizeof (CHAR16);
-  TempBuffer     = AllocateZeroPool (TempBufferSize);
+  _Bundled{
+  	TempBufferSize = (UINTN)FileInfo->FileSize + sizeof (CHAR16);
+  	TempBuffer= NULL;
+  }
+  _Bundled{
+  	TempBuffer     = _Assume_bounds_cast<_Array_ptr<VOID>>(
+			AllocateZeroPool (TempBufferSize), byte_count(TempBufferSize));
+  }
   if (TempBuffer == NULL) {
     Handle->Close (Handle);
     gBS->FreePool (FileInfo);
@@ -108,7 +114,7 @@ ReadFileFromVol (
                      );
   if (EFI_ERROR (Status)) {
     Handle->Close (Handle);
-    gBS->FreePool (TempBuffer);
+    gBS->FreePool ((void*)TempBuffer);
     return Status;
   }
 
@@ -174,7 +180,7 @@ ReadFileToBuffer (
     //
     // Read file directly from Vol
     //
-    return ReadFileFromVol (DebuggerPrivate->Vol, FileName, BufferSize, Buffer);
+    return ReadFileFromVol (DebuggerPrivate->Vol, FileName, BufferSize, (_Array_ptr<void> *)Buffer);
   }
 
   //
@@ -211,7 +217,7 @@ ReadFileToBuffer (
       continue;
     }
 
-    Status = ReadFileFromVol (Vol, FileName, &TempBufferSize, &TempBuffer);
+    Status = ReadFileFromVol (Vol, FileName, &TempBufferSize, (_Array_ptr<void> *)&TempBuffer);
     if (!EFI_ERROR (Status)) {
       //
       // Read file OK, check duplication

@@ -383,7 +383,7 @@ SmmLoadImage (
                  NameGuid,
                  EFI_SECTION_PE32,
                  0,
-                 &Buffer,
+                 (_Array_ptr<void> *)&Buffer,
                  &Size,
                  &AuthenticationStatus
                  );
@@ -399,7 +399,7 @@ SmmLoadImage (
                    NameGuid,
                    EFI_SECTION_TE,
                    0,
-                   &Buffer,
+                   (_Array_ptr<void> *)&Buffer,
                    &Size,
                    &AuthenticationStatus
                    );
@@ -801,7 +801,7 @@ SmmGetDepexSectionAndPreProccess (
                       &DriverEntry->FileName,
                       SectionType,
                       0,
-                      &DriverEntry->Depex,
+                      (_Array_ptr<VOID>*)&DriverEntry->Depex,
                       (UINTN *)&DriverEntry->DepexSize,
                       &AuthenticationStatus
                       );
@@ -1439,7 +1439,7 @@ SmmDriverDispatchHandler (
                         &gAprioriGuid,
                         EFI_SECTION_RAW,
                         0,
-                        (VOID **)&AprioriFile,
+                        (_Array_ptr<VOID>*)&AprioriFile,
                         &SizeOfBuffer,
                         &AuthenticationStatus
                         );

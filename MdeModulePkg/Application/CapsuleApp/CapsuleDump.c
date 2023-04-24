@@ -705,7 +705,7 @@ DumpCapsuleFromDisk (
   EFI_FILE       *FileHandle;
   UINTN          Index;
   UINTN          FileSize;
-  VOID           *FileBuffer;
+  _Array_ptr<VOID>           FileBuffer : byte_count(FileSize) = NULL;
   EFI_FILE_INFO  **FileInfoBuffer;
   EFI_FILE_INFO  *FileInfo;
   UINTN          FileCount;
@@ -824,7 +824,9 @@ DumpCapsuleFromDisk (
       goto Done;
     }
 
-    FileBuffer = AllocatePool (FileSize);
+    FileBuffer = _Assume_bounds_cast<_Array_ptr<VOID>>(AllocatePool(FileSize),
+            byte_count(FileSize));
+
     if (FileBuffer == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
       goto Done;

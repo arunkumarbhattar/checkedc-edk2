@@ -747,7 +747,7 @@ LocateExPcdBinary (
   Status = GetSectionFromFfs (
              EFI_SECTION_RAW,
              0,
-             (VOID **)&mDxePcdDbBinary,
+             (_Array_ptr<VOID>*)&mDxePcdDbBinary,
              &mDxePcdDbSize
              );
   ASSERT_EFI_ERROR (Status);

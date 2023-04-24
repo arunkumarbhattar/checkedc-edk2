@@ -252,7 +252,7 @@ CoreGetDepexSectionAndPreProccess (
                       &DriverEntry->FileName,
                       SectionType,
                       0,
-                      &DriverEntry->Depex,
+                      (_Array_ptr<VOID>*)&DriverEntry->Depex,
                       (UINTN *)&DriverEntry->DepexSize,
                       &AuthenticationStatus
                       );
@@ -1039,7 +1039,7 @@ CoreProcessFvImageFile (
                           FileName,
                           SectionType,
                           Index,
-                          &Buffer,
+                          (_Array_ptr<VOID>*)&Buffer,
                           &BufferSize,
                           &AuthenticationStatus
                           );
@@ -1337,7 +1337,7 @@ CoreFwVolEventProtocolNotify (
                                  &NameGuid,
                                  EFI_SECTION_SMM_DEPEX,
                                  0,
-                                 &DepexBuffer,
+                                 (_Array_ptr<VOID>*)&DepexBuffer,
                                  &SizeOfBuffer,
                                  &AuthenticationStatus
                                  );
@@ -1360,7 +1360,7 @@ CoreFwVolEventProtocolNotify (
                                  &NameGuid,
                                  EFI_SECTION_DXE_DEPEX,
                                  0,
-                                 &DepexBuffer,
+                                 (_Array_ptr<VOID>*)&DepexBuffer,
                                  &SizeOfBuffer,
                                  &AuthenticationStatus
                                  );
@@ -1395,7 +1395,7 @@ CoreFwVolEventProtocolNotify (
                         &gAprioriGuid,
                         EFI_SECTION_RAW,
                         0,
-                        (VOID **)&AprioriFile,
+                        (_Array_ptr<VOID>*)&AprioriFile,
                         &SizeOfBuffer,
                         &AuthenticationStatus
                         );

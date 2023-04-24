@@ -2479,7 +2479,7 @@ SetFileInfo (
   IN      UINT64         FileSize,
   IN      CHAR16         *FileName,
   IN OUT  UINTN          *BufferSize,
-  OUT     VOID           *Buffer
+  OUT     VOID           * _Array Buffer
   )
 {
   UINTN                    FileInfoLength;
@@ -2877,7 +2877,7 @@ ReadFileData (
   IN      UDF_FILE_INFO          *File,
   IN      UINT64                 FileSize,
   IN OUT  UINT64                 *FilePosition,
-  IN OUT  VOID                   *Buffer,
+  IN OUT  _Array_ptr<VOID>       Buffer,
   IN OUT  UINT64                 *BufferSize
   )
 {
@@ -2886,7 +2886,7 @@ ReadFileData (
 
   ReadFileInfo.Flags        = ReadFileSeekAndRead;
   ReadFileInfo.FilePosition = *FilePosition;
-  ReadFileInfo.FileData     = Buffer;
+  ReadFileInfo.FileData     = (void*)Buffer;
   ReadFileInfo.FileDataSize = *BufferSize;
   ReadFileInfo.FileSize     = FileSize;
 
