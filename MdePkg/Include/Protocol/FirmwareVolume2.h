@@ -402,7 +402,7 @@ EFI_STATUS
   IN CONST  EFI_GUID                      *NameGuid,
   IN        EFI_SECTION_TYPE              SectionType,
   IN        UINTN                         SectionInstance,
-  IN OUT    _Array_ptr<VOID>              *Buffer : count(*BufferSize),
+  IN OUT    _Array_ptr<VOID> *             Buffer :   byte_count(*BufferSize) ,
   IN OUT    UINTN                         *BufferSize,
   OUT       UINT32                        *AuthenticationStatus
   );
